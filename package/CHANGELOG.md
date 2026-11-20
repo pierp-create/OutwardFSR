@@ -11,7 +11,7 @@
 - New: on-screen notice for a few seconds when pressing F9, showing the active upscaler or "native" (can be turned off).
 - Documentation: added "First start" and "Feedback and bug reports" sections, AI-assistance notice and link to the source code.
 - Settings menu: options that only affect FSR 3.1 (reactive mask, reflection flicker reduction, debug view) are now labelled "FSR 3.1 only".
-- Settings menu: upscaler names now display correctly as "FSR 4" and "FSR 3.1".
+- Settings menu: option values now display correctly ("FSR 4", "FSR 3.1", "AMD", "Native AA (100%)"…), and quality presets show their internal resolution.
 
 ## 1.0.0 — 2026-11-20
 
@@ -52,7 +52,7 @@ First public release.
 - Novità: avviso a schermo per qualche secondo quando premi F9, con l'upscaler attivo o "nativo" (disattivabile).
 - Documentazione: aggiunte le sezioni "Primo avvio" e "Segnalazioni e suggerimenti", la nota sull'aiuto dell'intelligenza artificiale e il link al codice sorgente.
 - Menu delle impostazioni: le opzioni che valgono solo per FSR 3.1 (maschera reattiva, riduzione sfarfallio riflessi, vista di debug) ora riportano "solo FSR 3.1".
-- Menu delle impostazioni: i nomi degli upscaler ora compaiono correttamente come "FSR 4" e "FSR 3.1".
+- Menu delle impostazioni: i valori delle opzioni ora compaiono correttamente ("FSR 4", "FSR 3.1", "AMD", "Native AA (100%)"…) e i preset di qualità indicano la risoluzione interna.
 
 ## 1.0.0 — 20/11/2026
 

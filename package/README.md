@@ -68,6 +68,7 @@ There is nothing to compile or set up: the shaders are already compiled and incl
 
 - The automatic reactive mask is only used by the built-in FSR 3.1 and is off by default: it reduces trails behind fire and particles but increases shimmering on glass and reflections. FSR 4 handles these cases on its own.
 - Toggling with F9 or changing settings recreates FSR, which can cause a short hitch.
+- With *Full-resolution post-processing* on, the image can look slightly darker and calmer than native: bloom and auto-exposure now work on a clean, stable image instead of an aliased one, so flickering highlights no longer add extra glow. Turn the option off if you prefer the original brightness (light sources will shimmer a little more).
 
 ## Feedback and bug reports
 
@@ -159,6 +160,7 @@ Non c'è niente da compilare né da configurare: gli shader sono già compilati 
 
 - La maschera reattiva automatica è usata solo dall'FSR 3.1 integrato ed è spenta di default: riduce le scie dietro fuoco e particelle ma aumenta lo sfarfallio su vetri e riflessi. FSR 4 gestisce questi casi da solo.
 - Attivare o disattivare con F9, o cambiare le impostazioni, ricrea FSR e può causare un breve scatto.
+- Con *Post-processing a piena risoluzione* attivo, l'immagine può risultare leggermente più scura e più calma rispetto al nativo: bloom ed esposizione automatica lavorano su un'immagine pulita e stabile invece che su una con aliasing, quindi le luci che sfarfallano non aggiungono più bagliore. Se preferisci la luminosità originale, disattiva l'opzione (le fonti di luce sfarfalleranno un po' di più).
 
 ## Segnalazioni e suggerimenti
 
