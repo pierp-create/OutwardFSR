@@ -4,8 +4,14 @@
 
 ## 1.0.1 — 2026-11-20
 
+- New: the settings menu is available in English and Italian (setting "Menu language", Auto = Windows language).
+- Settings are now stored with English names in the .cfg file. **Settings from 1.0.0 are reset to their defaults once.**
+- FSR 3.1: the automatic reactive mask is now off by default, because it increased shimmering on glass and reflections.
+- New: "Upscaler attivo" line in the F5 menu showing the upscaler in use, its exact version (e.g. FSR 4.1.2) and the resolutions.
+- New: on-screen notice for a few seconds when pressing F9, showing the active upscaler or "native" (can be turned off).
 - Documentation: added "First start" and "Feedback and bug reports" sections, AI-assistance notice and link to the source code.
-- Settings menu: options that only affect FSR 3.1 (reactive mask, reflection flicker reduction, debug view) are now labelled as such.
+- Settings menu: options that only affect FSR 3.1 (reactive mask, reflection flicker reduction, debug view) are now labelled "FSR 3.1 only".
+- Settings menu: upscaler names now display correctly as "FSR 4" and "FSR 3.1".
 
 ## 1.0.0 — 2026-11-20
 
@@ -39,8 +45,14 @@ First public release.
 
 ## 1.0.1 — 20/11/2026
 
+- Novità: il menu delle impostazioni è disponibile in italiano e in inglese (impostazione "Lingua del menu", Auto = lingua di Windows).
+- Le impostazioni ora sono salvate con nomi inglesi nel file .cfg. **Le impostazioni della 1.0.0 tornano una volta ai valori predefiniti.**
+- FSR 3.1: la maschera reattiva automatica ora è spenta di default, perché aumentava lo sfarfallio su vetri e riflessi.
+- Novità: riga "Upscaler attivo" nel menu F5, con l'upscaler in uso, la sua versione esatta (ad es. FSR 4.1.2) e le risoluzioni.
+- Novità: avviso a schermo per qualche secondo quando premi F9, con l'upscaler attivo o "nativo" (disattivabile).
 - Documentazione: aggiunte le sezioni "Primo avvio" e "Segnalazioni e suggerimenti", la nota sull'aiuto dell'intelligenza artificiale e il link al codice sorgente.
-- Menu delle impostazioni: le opzioni che valgono solo per FSR 3.1 (maschera reattiva, riduzione sfarfallio riflessi, vista di debug) ora lo indicano.
+- Menu delle impostazioni: le opzioni che valgono solo per FSR 3.1 (maschera reattiva, riduzione sfarfallio riflessi, vista di debug) ora riportano "solo FSR 3.1".
+- Menu delle impostazioni: i nomi degli upscaler ora compaiono correttamente come "FSR 4" e "FSR 3.1".
 
 ## 1.0.0 — 20/11/2026
 

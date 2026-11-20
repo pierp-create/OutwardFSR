@@ -7,9 +7,9 @@ namespace OutwardFSR
     internal enum MipBiasMode
     {
         /// <summary>Nessuna correzione.</summary>
-        Disattivato,
+        Off,
         /// <summary>log2(render/schermo): compensa solo la risoluzione ridotta.</summary>
-        Moderato,
+        Moderate,
         /// <summary>log2(render/schermo) - 1: valore raccomandato da AMD per FSR.</summary>
         AMD
     }
@@ -29,7 +29,7 @@ namespace OutwardFSR
 
         public static float Compute(MipBiasMode mode, int renderWidth, int displayWidth)
         {
-            if (mode == MipBiasMode.Disattivato || renderWidth >= displayWidth) return 0f;
+            if (mode == MipBiasMode.Off || renderWidth >= displayWidth) return 0f;
             float b = Mathf.Log((float)renderWidth / displayWidth, 2f);
             if (mode == MipBiasMode.AMD) b -= 1f;
             return Mathf.Clamp(b, -3f, 0f);

@@ -29,16 +29,19 @@ The game keeps running in DirectX 11. For FSR 4, the mod opens a DirectX 12 devi
 
 Open **F5 → Outward FSR** (with Outward Config Manager), or edit `BepInEx/config/com.outwardfsr.mod.cfg`.
 
-The setting names in the menu are in Italian:
+The menu is available in English and Italian (setting *Menu language*, Auto = Windows language).
 
-| Setting (menu name) | Default | Description |
+| Setting | Default | Description |
 |---|---|---|
-| Attivo | On | Turns upscaling on or off |
-| Tasto attiva/disattiva | F9 | Toggles upscaling while playing |
-| Upscaler | FSR4 | FSR4, FSR3 or Bilineare (simple bilinear stretch, for comparison only) |
-| Qualita | Quality | Internal resolution, see below |
-| Nitidezza | 0.6 | FSR sharpening strength (0–1) |
-| Nitidezza texture (mipmap bias) | Moderato | Disattivato (off) / Moderato (moderate) / AMD. "Moderato" avoids shimmering on fine textures |
+| Menu language | Auto | English, Italiano or Auto (Windows language) |
+| Active upscaler | – | Read-only: upscaler in use, its exact version (e.g. FSR 4.1.2) and resolutions |
+| Enabled | On | Turns upscaling on or off |
+| Toggle key | F9 | Toggles upscaling while playing |
+| On-screen notice with F9 | On | Shows the active upscaler for a few seconds when you press F9 |
+| Upscaler | FSR 4 | FSR 4, FSR 3.1 or Bilinear (comparison only) |
+| Quality | Quality | Internal resolution, see below |
+| Sharpness | 0.6 | FSR sharpening strength (0–1) |
+| Texture sharpness (mipmap bias) | Moderate | Off / Moderate / AMD. "Moderate" avoids shimmering on fine textures |
 
 | Quality | Internal resolution |
 |---|---|
@@ -63,7 +66,7 @@ There is nothing to compile or set up: the shaders are already compiled and incl
 
 ## Known limitations
 
-- With FSR 4, the reactive mask (which helps with fire and particles) is not used yet. FSR 4 handles most of these cases well on its own.
+- The automatic reactive mask is only used by the built-in FSR 3.1 and is off by default: it reduces trails behind fire and particles but increases shimmering on glass and reflections. FSR 4 handles these cases on its own.
 - Toggling with F9 or changing settings recreates FSR, which can cause a short hitch.
 
 ## Feedback and bug reports
@@ -117,14 +120,19 @@ Il gioco continua a girare in DirectX 11. Per FSR 4 la mod apre un dispositivo D
 
 Apri **F5 → Outward FSR** (con Outward Config Manager) oppure modifica `BepInEx/config/com.outwardfsr.mod.cfg`.
 
+Il menu è disponibile in italiano e in inglese (impostazione *Lingua del menu*, Auto = lingua di Windows).
+
 | Impostazione | Predefinito | Descrizione |
 |---|---|---|
+| Lingua del menu | Auto | English, Italiano o Auto (lingua di Windows) |
+| Upscaler attivo | – | Solo lettura: upscaler in uso, versione esatta (ad es. FSR 4.1.2) e risoluzioni |
 | Attivo | Sì | Accende o spegne l'upscaling |
 | Tasto attiva/disattiva | F9 | Accende o spegne l'upscaling durante il gioco |
-| Upscaler | FSR4 | FSR4, FSR3 o Bilineare (solo per confronto) |
-| Qualita | Quality | Risoluzione interna, vedi sotto |
+| Avviso a schermo con F9 | Sì | Mostra per qualche secondo l'upscaler attivo quando premi F9 |
+| Upscaler | FSR 4 | FSR 4, FSR 3.1 o Bilinear (solo per confronto) |
+| Qualità | Quality | Risoluzione interna, vedi sotto |
 | Nitidezza | 0.6 | Intensità della nitidezza di FSR (0–1) |
-| Nitidezza texture (mipmap bias) | Moderato | Disattivato / Moderato / AMD. "Moderato" evita lo sfarfallio sulle texture fini |
+| Nitidezza texture (mipmap bias) | Moderate | Off / Moderate / AMD. "Moderate" evita lo sfarfallio sulle texture fini |
 
 | Qualità | Risoluzione interna |
 |---|---|
@@ -149,7 +157,7 @@ Non c'è niente da compilare né da configurare: gli shader sono già compilati 
 
 ## Limitazioni note
 
-- Con FSR 4 la maschera reattiva (che aiuta con fuoco e particelle) non è ancora usata. FSR 4 gestisce bene da solo la maggior parte di questi casi.
+- La maschera reattiva automatica è usata solo dall'FSR 3.1 integrato ed è spenta di default: riduce le scie dietro fuoco e particelle ma aumenta lo sfarfallio su vetri e riflessi. FSR 4 gestisce questi casi da solo.
 - Attivare o disattivare con F9, o cambiare le impostazioni, ricrea FSR e può causare un breve scatto.
 
 ## Segnalazioni e suggerimenti

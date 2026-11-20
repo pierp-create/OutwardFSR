@@ -17,13 +17,17 @@ namespace OutwardFSR
         FineFrame
     }
 
+    // [Description] = nome mostrato nel menu F5 (senza, il Config Manager scriverebbe "F S R4")
     internal enum UpscalerType
     {
         /// <summary>Semplice stiramento bilineare (test).</summary>
-        Bilineare,
+        [System.ComponentModel.Description("Bilinear")]
+        Bilinear,
         /// <summary>AMD FidelityFX Super Resolution 3.1.</summary>
+        [System.ComponentModel.Description("FSR 3.1")]
         FSR3,
         /// <summary>AMD FSR 4 tramite le DLL ufficiali AMD (DirectX 12, ponte dal DirectX 11 del gioco).</summary>
+        [System.ComponentModel.Description("FSR 4")]
         FSR4
     }
 
@@ -146,11 +150,13 @@ namespace OutwardFSR
                 if (_useFsr4)
                 {
                     string ver = Fsr4Native.VersionName;
-                    if (string.IsNullOrEmpty(ver) || ver == "sconosciuta") name = "FSR 4 (avvio...)";
-                    else name = ver.EndsWith("*") ? "FSR " + ver.TrimEnd('*', ' ') + " (driver AMD)" : "FSR " + ver;
+                    if (string.IsNullOrEmpty(ver) || ver == "sconosciuta") name = Plugin.L("FSR 4 (starting...)", "FSR 4 (avvio...)");
+                    else name = ver.EndsWith("*") ? "FSR " + ver.TrimEnd('*', ' ') + Plugin.L(" (AMD driver)", " (driver AMD)") : "FSR " + ver;
                 }
-                else if (_useFsr) name = _upscalerSetting == UpscalerType.FSR4 ? "FSR 3.1 (FSR 4 non disponibile)" : "FSR 3.1 (integrato)";
-                else name = "Bilineare";
+                else if (_useFsr) name = _upscalerSetting == UpscalerType.FSR4
+                    ? Plugin.L("FSR 3.1 (FSR 4 not available)", "FSR 3.1 (FSR 4 non disponibile)")
+                    : Plugin.L("FSR 3.1 (built-in)", "FSR 3.1 (integrato)");
+                else name = Plugin.L("Bilinear", "Bilineare");
 
                 string q = Temporal ? " · " + _quality : "";
                 string res = _lowRes != null ? $" · {_lowRes.width}×{_lowRes.height} → {Screen.width}×{Screen.height}" : "";
