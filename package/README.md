@@ -66,6 +66,11 @@ There is nothing to compile or set up: the shaders are already compiled and incl
 - With FSR 4, the reactive mask (which helps with fire and particles) is not used yet. FSR 4 handles most of these cases well on its own.
 - Toggling with F9 or changing settings recreates FSR, which can cause a short hitch.
 
+## Feedback and bug reports
+
+Please report bugs and suggestions on GitHub: https://github.com/pierp-create/OutwardFSR/issues
+Include your GPU, the FSR mode and quality you use, and your `BepInEx/LogOutput.log` if possible.
+
 ## Troubleshooting
 
 Open `BepInEx/LogOutput.log` and look for lines starting with `[Outward FSR]` or `[FSR 4]`. A working FSR 4 setup shows `Contesto creato: 4.1.2 …` ("context created"). If FSR 4 fails, the log explains why and the mod switches to FSR 3.1.
@@ -146,6 +151,11 @@ Non c'è niente da compilare né da configurare: gli shader sono già compilati 
 
 - Con FSR 4 la maschera reattiva (che aiuta con fuoco e particelle) non è ancora usata. FSR 4 gestisce bene da solo la maggior parte di questi casi.
 - Attivare o disattivare con F9, o cambiare le impostazioni, ricrea FSR e può causare un breve scatto.
+
+## Segnalazioni e suggerimenti
+
+Segnala bug e suggerimenti su GitHub: https://github.com/pierp-create/OutwardFSR/issues
+Se puoi, indica scheda video, modalità e qualità di FSR che usi, e allega il file `BepInEx/LogOutput.log`.
 
 ## Risoluzione dei problemi
 

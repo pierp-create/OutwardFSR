@@ -4,8 +4,8 @@
 
 ## 1.0.1 — 2026-11-20
 
-- Documentation: added "First start" section, AI-assistance notice and link to the source code.
-- No changes to the mod itself.
+- Documentation: added "First start" and "Feedback and bug reports" sections, AI-assistance notice and link to the source code.
+- Settings menu: options that only affect FSR 3.1 (reactive mask, reflection flicker reduction, debug view) are now labelled as such.
 
 ## 1.0.0 — 2026-11-20
 
@@ -39,8 +39,8 @@ First public release.
 
 ## 1.0.1 — 20/11/2026
 
-- Documentazione: aggiunte la sezione "Primo avvio", la nota sull'aiuto dell'intelligenza artificiale e il link al codice sorgente.
-- Nessuna modifica alla mod.
+- Documentazione: aggiunte le sezioni "Primo avvio" e "Segnalazioni e suggerimenti", la nota sull'aiuto dell'intelligenza artificiale e il link al codice sorgente.
+- Menu delle impostazioni: le opzioni che valgono solo per FSR 3.1 (maschera reattiva, riduzione sfarfallio riflessi, vista di debug) ora lo indicano.
 
 ## 1.0.0 — 20/11/2026
 

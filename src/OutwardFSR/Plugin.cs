@@ -72,10 +72,10 @@ namespace OutwardFSR
 
             // ---------------- 2. Avanzate ----------------
             FsrReactive = Config.Bind(Advanced, "Maschera reattiva automatica", true,
-                Desc("Riduce le scie su fuoco, particelle, luci e oggetti trasparenti. Consigliata.", 95, null, true));
+                Desc("Solo FSR 3.1 (FSR 4 gestisce questi casi da solo). Riduce le scie su fuoco, particelle, luci e oggetti trasparenti. Consigliata.", 95, null, true));
 
             FsrAutoTcr = Config.Bind(Advanced, "Riduzione sfarfallio riflessi (sperimentale)", false,
-                Desc("Funzione sperimentale di FSR 3.1 che individua da sola riflessi e trasparenze problematiche. " +
+                Desc("Solo FSR 3.1, sperimentale: non serve con FSR 4, che risolve gia' lo sfarfallio dei riflessi. Individua da sola riflessi e trasparenze problematiche. " +
                      "Puo' ridurre lo sfarfallio sulle superfici lucide, a volte a scapito di un po' di stabilita'. Richiede la maschera reattiva.", 94, null, true));
 
             FullResPostFx = Config.Bind(Advanced, "Post-processing a piena risoluzione", true,
@@ -94,7 +94,7 @@ namespace OutwardFSR
 
             // ---------------- 3. Diagnostica ----------------
             FsrDebugView = Config.Bind(Diagnostics, "Vista di debug FSR", false,
-                Desc("Mostra la vista di debug di FSR (vettori di movimento, profondita', reattivita').", 100, null, true));
+                Desc("Solo FSR 3.1. Mostra la vista di debug di FSR (vettori di movimento, profondita', reattivita').", 100, null, true));
 
             FrameStatsEnabled = Config.Bind(Diagnostics, "Misura frame time", false,
                 Desc("Ogni 10 secondi scrive nel log FPS medi, 1% low e scatti, indicando se l'upscaling era attivo. " +
