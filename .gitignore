@@ -1,0 +1,31 @@
+# Visual Studio / build
+.vs/
+bin/
+obj/
+*.user
+*.suo
+native/bin/
+native/OutwardFSR4Native/obj/
+native/OutwardFSR4Native/x64/
+
+# Pacchetti generati
+dist/
+
+# Dipendenze esterne (si scaricano a parte, vedi README)
+FSR3Unity/
+FSR-SDK/
+
+# Progetto Unity: file generati
+UnityShaders/Library/
+UnityShaders/Temp/
+UnityShaders/Logs/
+UnityShaders/obj/
+UnityShaders/UserSettings/
+UnityShaders/*.csproj
+UnityShaders/*.sln
+Bundles/*.manifest
+Bundles/Bundles
+
+# Log (possono contenere nome utente e percorsi del PC)
+*.log
+UnityShaders/build.log

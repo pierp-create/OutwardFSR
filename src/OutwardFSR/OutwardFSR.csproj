@@ -1,0 +1,111 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>OutwardFSR</AssemblyName>
+    <RootNamespace>OutwardFSR</RootNamespace>
+    <LangVersion>9.0</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Version>1.0.1</Version>
+    <Authors>pierp</Authors>
+    <ModAuthor>pierp</ModAuthor>
+  </PropertyGroup>
+
+  <!-- Percorsi: modificali qui se sposti il gioco o il profilo r2modman -->
+  <PropertyGroup>
+    <GameDir>D:\SteamLibrary\steamapps\common\Outward\Outward_Defed</GameDir>
+    <ManagedDir>$(GameDir)\Outward Definitive Edition_Data\Managed</ManagedDir>
+    <ProfileDir>$(APPDATA)\r2modmanPlus-local\OutwardDe\profiles\FSR-Dev</ProfileDir>
+    <BepInExCore>$(ProfileDir)\BepInEx\core</BepInExCore>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Permette di compilare per .NET Framework 4.7.2 anche senza targeting pack installato -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BepInEx">
+      <HintPath>$(BepInExCore)\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(BepInExCore)\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(ManagedDir)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(ManagedDir)\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>$(ManagedDir)\UnityEngine.AssetBundleModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(ManagedDir)\UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(ManagedDir)\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.Postprocessing.Runtime">
+      <HintPath>$(ManagedDir)\Unity.Postprocessing.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Codice di FSR 3.1 (FSR3Unity, licenza MIT) compilato direttamente nella mod -->
+  <PropertyGroup>
+    <FsrRuntime>$(MSBuildProjectDirectory)\..\..\FSR3Unity\Packages\fidelityfx.fsr\Runtime</FsrRuntime>
+    <ShaderBundle>$(MSBuildProjectDirectory)\..\..\Bundles\outwardfsr_shaders</ShaderBundle>
+    <NativeBin>$(MSBuildProjectDirectory)\..\..\native\bin</NativeBin>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(FsrRuntime)\Common\*.cs" Link="FSR\Common\%(Filename)%(Extension)" />
+    <Compile Include="$(FsrRuntime)\FSR3\*.cs" Link="FSR\FSR3\%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Plugin nativo FSR 4 + DLL firmate AMD (compilati dal progetto native\OutwardFSR4Native) -->
+    <NativeFiles Include="$(NativeBin)\OutwardFSR4Native.dll;$(NativeBin)\amd_fidelityfx_loader_dx12.dll;$(NativeBin)\amd_fidelityfx_upscaler_dx12.dll" />
+  </ItemGroup>
+
+  <!-- Dopo ogni compilazione copia la DLL (e il bundle degli shader) nel profilo FSR-Dev di r2modman -->
+  <Target Name="CopyToProfile" AfterTargets="Build" Condition="Exists('$(ProfileDir)\BepInEx\plugins')">
+    <MakeDir Directories="$(ProfileDir)\BepInEx\plugins\OutwardFSR" />
+    <Copy SourceFiles="$(TargetPath);$(TargetDir)$(TargetName).pdb" DestinationFolder="$(ProfileDir)\BepInEx\plugins\OutwardFSR" ContinueOnError="true" />
+    <Copy SourceFiles="$(ShaderBundle)" DestinationFolder="$(ProfileDir)\BepInEx\plugins\OutwardFSR" Condition="Exists('$(ShaderBundle)')" ContinueOnError="true" />
+    <Copy SourceFiles="@(NativeFiles)" DestinationFolder="$(ProfileDir)\BepInEx\plugins\OutwardFSR" Condition="Exists('%(FullPath)')" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Warning Text="Plugin nativo FSR 4 non trovato in $(NativeBin): compila il progetto OutwardFSR4Native" Condition="!Exists('$(NativeBin)\OutwardFSR4Native.dll')" />
+    <Warning Text="Bundle shader FSR non trovato: esegui tools\CompilaShader.bat" Condition="!Exists('$(ShaderBundle)')" />
+    <Message Importance="high" Text="OutwardFSR copiato in $(ProfileDir)\BepInEx\plugins\OutwardFSR" />
+  </Target>
+
+  <!-- Crea lo zip installabile con r2modman ("Import local mod") in dist\ -->
+  <PropertyGroup>
+    <PackageSrc>$(MSBuildProjectDirectory)\..\..\package</PackageSrc>
+    <PackageStage>$(MSBuildProjectDirectory)\obj\package</PackageStage>
+    <PackageOut>$(MSBuildProjectDirectory)\..\..\dist</PackageOut>
+  </PropertyGroup>
+  <Target Name="MakePackage" AfterTargets="Build" Condition="Exists('$(ShaderBundle)') And Exists('$(PackageSrc)\manifest.json')">
+    <RemoveDir Directories="$(PackageStage)" />
+    <MakeDir Directories="$(PackageStage)\plugins;$(PackageOut)" />
+    <Copy SourceFiles="$(PackageSrc)\manifest.json;$(PackageSrc)\README.md;$(PackageSrc)\icon.png;$(PackageSrc)\LICENSE-AMD-FSR.txt;$(PackageSrc)\CHANGELOG.md;$(PackageSrc)\LICENSE;$(PackageSrc)\THIRD-PARTY-NOTICES.md" DestinationFolder="$(PackageStage)" />
+    <Copy SourceFiles="$(TargetPath);$(ShaderBundle)" DestinationFolder="$(PackageStage)\plugins" />
+    <Copy SourceFiles="@(NativeFiles)" DestinationFolder="$(PackageStage)\plugins" Condition="Exists('%(FullPath)')" />
+    <Delete Files="$(PackageOut)\$(ModAuthor)-OutwardFSR-$(Version).zip" />
+    <ZipDirectory SourceDirectory="$(PackageStage)" DestinationFile="$(PackageOut)\$(ModAuthor)-OutwardFSR-$(Version).zip" />
+    <Message Importance="high" Text="Pacchetto creato: $(PackageOut)\$(ModAuthor)-OutwardFSR-$(Version).zip" />
+  </Target>
+
+</Project>

@@ -1,0 +1,18 @@
+// Copia profondita' e vettori di movimento della telecamera in texture "normali"
+// (R32F e RG16F) che il plugin nativo puo' passare a FSR 4 tramite DirectX 12.
+#pragma kernel CSMain
+
+Texture2D<float>  _InDepth;
+Texture2D<float2> _InMotion;
+RWTexture2D<float>  _OutDepth;
+RWTexture2D<float2> _OutMotion;
+uint2 _Size;
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _Size.x || id.y >= _Size.y)
+        return;
+    _OutDepth[id.xy] = _InDepth[id.xy];
+    _OutMotion[id.xy] = _InMotion[id.xy];
+}

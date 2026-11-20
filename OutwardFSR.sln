@@ -1,0 +1,31 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OutwardFSR", "src\OutwardFSR\OutwardFSR.csproj", "{2757D1EB-D30E-4265-9035-5B60D72CF225}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6A4C2E51-8B0D-4F3A-9C77-1E2D5B9A4F10} = {6A4C2E51-8B0D-4F3A-9C77-1E2D5B9A4F10}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OutwardFSR4Native", "native\OutwardFSR4Native\OutwardFSR4Native.vcxproj", "{6A4C2E51-8B0D-4F3A-9C77-1E2D5B9A4F10}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2757D1EB-D30E-4265-9035-5B60D72CF225}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2757D1EB-D30E-4265-9035-5B60D72CF225}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2757D1EB-D30E-4265-9035-5B60D72CF225}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2757D1EB-D30E-4265-9035-5B60D72CF225}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A4C2E51-8B0D-4F3A-9C77-1E2D5B9A4F10}.Debug|Any CPU.ActiveCfg = Release|x64
+		{6A4C2E51-8B0D-4F3A-9C77-1E2D5B9A4F10}.Debug|Any CPU.Build.0 = Release|x64
+		{6A4C2E51-8B0D-4F3A-9C77-1E2D5B9A4F10}.Release|Any CPU.ActiveCfg = Release|x64
+		{6A4C2E51-8B0D-4F3A-9C77-1E2D5B9A4F10}.Release|Any CPU.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
