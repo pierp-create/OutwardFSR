@@ -171,7 +171,7 @@ namespace OutwardFSR
 
         internal bool NeedsRebuild() =>
             _upscalerSetting != Plugin.Upscaler.Value ||
-            _quality != Plugin.FsrQuality.Value ||
+            _quality != (Fsr3Upscaler.QualityMode)(int)Plugin.FsrQuality.Value ||
             _depthSource != Plugin.FsrDepthSource.Value ||
             _splitPostFxSetting != Plugin.FullResPostFx.Value ||
             _useReactive != (_useFsr && Plugin.FsrReactive.Value) ||
@@ -183,7 +183,7 @@ namespace OutwardFSR
             _cam = GetComponent<Camera>();
             _mode = PresentMode.Presenter;
             _upscalerSetting = Plugin.Upscaler.Value;
-            _quality = Plugin.FsrQuality.Value;
+            _quality = (Fsr3Upscaler.QualityMode)(int)Plugin.FsrQuality.Value;
             _depthSource = Plugin.FsrDepthSource.Value;
             _splitPostFxSetting = Plugin.FullResPostFx.Value;
             _mipMode = Plugin.MipBiasSetting.Value;

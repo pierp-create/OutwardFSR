@@ -19,7 +19,7 @@ namespace OutwardFSR
         internal static ConfigEntry<bool> ScalingEnabled;
         internal static ConfigEntry<KeyboardShortcut> ToggleKey;
         internal static ConfigEntry<UpscalerType> Upscaler;
-        internal static ConfigEntry<Fsr3Upscaler.QualityMode> FsrQuality;
+        internal static ConfigEntry<QualityPreset> FsrQuality;
         internal static ConfigEntry<float> FsrSharpness;
         internal static ConfigEntry<string> ActiveInfo;
         internal static ConfigEntry<bool> ShowToast;
@@ -96,6 +96,8 @@ namespace OutwardFSR
         /// Il Config Manager (F5) legge nomi e descrizioni solo quando costruisce la sua lista:
         /// gli chiediamo di ricostruirla, cosi' il cambio di lingua si vede subito.
         /// </summary>
+        private static bool _refreshMenu;
+
         private static void RefreshConfigManager()
         {
             try
@@ -161,7 +163,7 @@ namespace OutwardFSR
                 "FSR 3.1 = FidelityFX Super Resolution 3.1 integrato nella mod (qualsiasi scheda video). Bilinear = semplice ridimensionamento, solo per confronto. " +
                 "Se FSR 4 non parte, la mod passa a FSR 3.1.", 80);
 
-            FsrQuality = Bind(General, "Quality", "Qualita'", Fsr3Upscaler.QualityMode.Quality,
+            FsrQuality = Bind(General, "Quality", "Qualita'", QualityPreset.Quality,
                 "Internal resolution compared to the screen: NativeAA 100% (anti-aliasing only), UltraQuality 77%, Quality 67%, Balanced 59%, Performance 50%, UltraPerformance 33%.",
                 "Risoluzione interna rispetto allo schermo: NativeAA 100% (solo antialiasing), UltraQuality 77%, Quality 67%, Balanced 59%, Performance 50%, UltraPerformance 33%.", 70);
 
@@ -226,7 +228,7 @@ namespace OutwardFSR
                 "Salva nella cartella BepInEx l'immagine a bassa risoluzione e quella upscalata. Nessun tasto di default.", 70, null, true);
 
             ApplyLanguage();
-            Language.SettingChanged += (_, __) => { ApplyLanguage(); RefreshConfigManager(); };
+            Language.SettingChanged += (_, __) => { ApplyLanguage(); _refreshMenu = true; };
 
             PostFxSplit.InstallPatch(new HarmonyLib.Harmony(Guid));
 
@@ -270,6 +272,13 @@ namespace OutwardFSR
 
         private void Update()
         {
+            // Fuori dal disegno del menu, per non modificarne la lista mentre la sta disegnando
+            if (_refreshMenu)
+            {
+                _refreshMenu = false;
+                RefreshConfigManager();
+            }
+
             if (ToggleKey.Value.IsDown())
             {
                 _toastUntil = Time.unscaledTime + 3f;
@@ -295,6 +304,20 @@ namespace OutwardFSR
         {
             LowResController.Detach();
         }
+    }
+
+    /// <summary>
+    /// Preset di qualita' (stessi valori di Fsr3Upscaler.QualityMode). Esiste solo per avere nomi leggibili
+    /// nel menu F5: senza [Description] il Config Manager scriverebbe "Native A A".
+    /// </summary>
+    internal enum QualityPreset
+    {
+        [System.ComponentModel.Description("Native AA (100%)")] NativeAA = 0,
+        [System.ComponentModel.Description("Ultra Quality (77%)")] UltraQuality = 1,
+        [System.ComponentModel.Description("Quality (67%)")] Quality = 2,
+        [System.ComponentModel.Description("Balanced (59%)")] Balanced = 3,
+        [System.ComponentModel.Description("Performance (50%)")] Performance = 4,
+        [System.ComponentModel.Description("Ultra Performance (33%)")] UltraPerformance = 5,
     }
 
     internal enum MenuLanguage

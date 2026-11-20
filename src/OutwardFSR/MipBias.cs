@@ -7,10 +7,13 @@ namespace OutwardFSR
     internal enum MipBiasMode
     {
         /// <summary>Nessuna correzione.</summary>
+        [System.ComponentModel.Description("Off")]
         Off,
         /// <summary>log2(render/schermo): compensa solo la risoluzione ridotta.</summary>
+        [System.ComponentModel.Description("Moderate")]
         Moderate,
         /// <summary>log2(render/schermo) - 1: valore raccomandato da AMD per FSR.</summary>
+        [System.ComponentModel.Description("AMD")]
         AMD
     }
 
