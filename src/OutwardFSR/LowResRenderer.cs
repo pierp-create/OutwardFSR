@@ -137,6 +137,27 @@ namespace OutwardFSR
 
         internal string UpscalerName => _useFsr4 ? "FSR 4" : _useFsr ? "FSR 3.1" : "bilineare";
 
+        /// <summary>Testo per il menu e l'avviso a schermo, ad es. "FSR 4.1.2 · UltraQuality · 2133×1200 → 2560×1440".</summary>
+        internal string StatusText
+        {
+            get
+            {
+                string name;
+                if (_useFsr4)
+                {
+                    string ver = Fsr4Native.VersionName;
+                    if (string.IsNullOrEmpty(ver) || ver == "sconosciuta") name = "FSR 4 (avvio...)";
+                    else name = ver.EndsWith("*") ? "FSR " + ver.TrimEnd('*', ' ') + " (driver AMD)" : "FSR " + ver;
+                }
+                else if (_useFsr) name = _upscalerSetting == UpscalerType.FSR4 ? "FSR 3.1 (FSR 4 non disponibile)" : "FSR 3.1 (integrato)";
+                else name = "Bilineare";
+
+                string q = Temporal ? " · " + _quality : "";
+                string res = _lowRes != null ? $" · {_lowRes.width}×{_lowRes.height} → {Screen.width}×{Screen.height}" : "";
+                return name + q + res;
+            }
+        }
+
         // Contatori diagnostici
         internal int PreCullCount, PresenterPreCullCount, PresenterBlitCount, EndOfFrameBlitCount, SkippedCount, FsrDispatchCount;
 

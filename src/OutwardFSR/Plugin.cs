@@ -21,6 +21,8 @@ namespace OutwardFSR
         internal static ConfigEntry<UpscalerType> Upscaler;
         internal static ConfigEntry<Fsr3Upscaler.QualityMode> FsrQuality;
         internal static ConfigEntry<float> FsrSharpness;
+        internal static ConfigEntry<string> ActiveInfo;
+        internal static ConfigEntry<bool> ShowToast;
 
         // --- 2. Avanzate ---
         internal static ConfigEntry<bool> FullResPostFx;
@@ -49,6 +51,15 @@ namespace OutwardFSR
             // ---------------- 1. Generale ----------------
             ScalingEnabled = Config.Bind(General, "Attivo", true,
                 Desc("Attiva o disattiva l'upscaling. Si puo' cambiare anche in gioco con il tasto qui sotto.", 100));
+
+            ActiveInfo = Config.Bind(General, "Upscaler attivo", "",
+                new ConfigDescription("Solo informativo: mostra l'upscaler in uso, la sua versione e le risoluzioni. " +
+                                      "Per FSR 4 la versione e' quella scelta dalla DLL AMD (o dal driver).", null,
+                    new ConfigurationManagerAttributes { Order = 110, CustomDrawer = DrawActiveInfo, HideDefaultButton = true }));
+
+            ShowToast = Config.Bind(General, "Avviso a schermo con F9", true,
+                Desc("Quando premi il tasto attiva/disattiva, mostra per qualche secondo in alto a destra l'upscaler attivo " +
+                     "(o \"nativo\" se spento).", 85));
 
             ToggleKey = Config.Bind(General, "Tasto attiva/disattiva", new KeyboardShortcut(KeyCode.F9),
                 Desc("Tasto per accendere e spegnere l'upscaling al volo (utile per confrontare con il nativo).", 90));
@@ -121,10 +132,46 @@ namespace OutwardFSR
             return new ConfigDescription(text, range, attrs);
         }
 
+        // --- Stato attivo (menu F5 e avviso a schermo) ---
+        private static float _toastUntil;
+        private static GUIStyle _toastStyle;
+
+        internal static string CurrentStatus()
+        {
+            if (!ScalingEnabled.Value) return "Spento: rendering nativo";
+            var r = LowResController.Active;
+            return r != null ? r.StatusText : "In attesa della telecamera di gioco";
+        }
+
+        private static void DrawActiveInfo(ConfigEntryBase entry)
+        {
+            GUILayout.Label(CurrentStatus(), GUILayout.ExpandWidth(true));
+        }
+
+        private void OnGUI()
+        {
+            if (!ShowToast.Value || Time.unscaledTime > _toastUntil) return;
+
+            if (_toastStyle == null)
+            {
+                _toastStyle = new GUIStyle(GUI.skin.box) { wordWrap = false };
+                _toastStyle.normal.textColor = Color.white;
+            }
+            _toastStyle.fontSize = Mathf.Clamp(Screen.height / 50, 12, 40);
+            int pad = _toastStyle.fontSize / 2;
+            _toastStyle.padding = new RectOffset(pad, pad, pad / 2, pad / 2);
+
+            var text = new GUIContent("Outward FSR: " + CurrentStatus());
+            Vector2 size = _toastStyle.CalcSize(text);
+            float margin = Screen.height / 40f;
+            GUI.Box(new Rect(Screen.width - size.x - margin, margin, size.x, size.y), text, _toastStyle);
+        }
+
         private void Update()
         {
             if (ToggleKey.Value.IsDown())
             {
+                _toastUntil = Time.unscaledTime + 3f;
                 ScalingEnabled.Value = !ScalingEnabled.Value;
                 Log.LogInfo($"Upscaling {(ScalingEnabled.Value ? "ATTIVO" : "disattivato")} ({Upscaler.Value}, {FsrQuality.Value})");
             }

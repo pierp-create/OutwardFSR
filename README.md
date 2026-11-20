@@ -2,7 +2,7 @@
 
 Mod BepInEx per **Outward Definitive Edition** che aggiunge l'upscaling **AMD FSR 4** (DLL ufficiali AMD, tramite un ponte DirectX 11 → DirectX 12) e **FSR 3.1** (integrato, qualsiasi scheda video).
 
-Versione attuale: **1.0.0** (autore: pierp). Il README per i giocatori è in `package/README.md`.
+Autore: pierp. Il README per i giocatori è in `package/README.md`, le novità di ogni versione in `package/CHANGELOG.md`.
 
 ## Struttura
 
