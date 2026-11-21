@@ -132,14 +132,22 @@ namespace OutwardFSR
             }
         }
 
+        private static Plugin _self;
+
         private void Awake()
         {
             Log = Logger;
+            _self = this;
 
             // ---------------- 1. General ----------------
             Language = Bind(General, "Menu language", "Lingua del menu", MenuLanguage.Auto,
                 "Language of this menu and of the on-screen notice. Auto = Windows language. If the menu does not update, reopen it (F5) or restart the game.",
                 "Lingua di questo menu e dell'avviso a schermo. Auto = lingua di Windows. Se il menu non si aggiorna, riaprilo (F5) o riavvia il gioco.", 120);
+
+            Bind(General, "Recommended settings", "Impostazioni consigliate", "",
+                "Sets every graphics option back to the recommended value (the defaults). Menu language and keys are kept. Click twice to confirm.",
+                "Riporta tutte le opzioni grafiche al valore consigliato (quello predefinito). Lingua del menu e tasti restano invariati. Clicca due volte per confermare.",
+                115, null, false, DrawRecommended);
 
             ActiveInfo = Bind(General, "Active upscaler", "Upscaler attivo", "",
                 "Information only: the upscaler in use, its version and the resolutions. For FSR 4 the version is the one chosen by the AMD DLL (or driver).",
@@ -271,6 +279,44 @@ namespace OutwardFSR
             if (!ScalingEnabled.Value) return L("Off: native rendering", "Spento: rendering nativo");
             var r = LowResController.Active;
             return r != null ? r.StatusText : L("Waiting for the game camera", "In attesa della telecamera di gioco");
+        }
+
+        private static float _confirmUntil;
+
+        private static void DrawRecommended(ConfigEntryBase entry)
+        {
+            bool confirming = Time.unscaledTime < _confirmUntil;
+            string label = confirming
+                ? L("Click again to confirm", "Clicca di nuovo per confermare")
+                : L("Set all to recommended", "Ripristina impostazioni consigliate");
+            if (GUILayout.Button(label, GUILayout.ExpandWidth(true)))
+            {
+                if (confirming)
+                {
+                    _confirmUntil = 0f;
+                    ResetToRecommended();
+                }
+                else _confirmUntil = Time.unscaledTime + 4f;
+            }
+        }
+
+        /// <summary>Riporta ai valori predefiniti tutte le opzioni, tranne lingua, tasti e voci interne.</summary>
+        private static void ResetToRecommended()
+        {
+            if (_self == null) return;
+            int changed = 0;
+            foreach (var kv in _self.Config)
+            {
+                var e = kv.Value;
+                if (e == null || e.SettingType == typeof(KeyboardShortcut) || e == Language || e == ActiveInfo) continue;
+                if (kv.Key.Section == "Internal" || e.SettingType == typeof(string)) continue;
+                if (Equals(e.BoxedValue, e.DefaultValue)) continue;
+                e.BoxedValue = e.DefaultValue;
+                changed++;
+            }
+            Log.LogInfo($"Impostazioni consigliate ripristinate ({changed} opzioni cambiate).");
+            ShowNotice(L($"recommended settings restored ({changed} changed)", $"impostazioni consigliate ripristinate ({changed} cambiate)"), 4f);
+            _refreshMenu = true;
         }
 
         private static void DrawActiveInfo(ConfigEntryBase entry)

@@ -7,6 +7,7 @@
 - **Full-resolution post-processing is now off by default** (existing settings are switched off once on update). Measured on uncompressed frame captures with a still camera: with it off, shimmering is about 2.5 times lower than with it on, and lower than the native game; post-processing, atmosphere and sun are rendered in the original game's order, so colours and sun glow match the original. You can still turn it on in the advanced settings.
 - Fixed: since 1.0.2, edges against the sky (poles, pillars, roofs, foliage) could look stair-stepped with full-resolution post-processing on. The atmosphere, which also draws the sky, now uses a smooth full-resolution depth with the camera jitter compensated.
 - New advanced option *Stable sky edges* (on by default, only with full-resolution post-processing): stabilises the edge between objects and sky over time, halving its shimmer. Sun rays now receive the real scene depth too.
+- New *Set all to recommended* button at the top of the menu: one click (plus a confirmation) puts every graphics option back to its recommended value. Menu language and keys are kept.
 - New diagnostic option *Frame sequence key* (unbound by default): saves 30 consecutive uncompressed frames to `BepInEx/OutwardFSR_captures`, useful for bug reports about shimmering.
 
 ## 1.0.2 — 2026-11-21
@@ -62,6 +63,7 @@ First public release.
 - **Il post-processing a piena risoluzione ora è spento di default** (con l'aggiornamento le impostazioni esistenti vengono spente una volta). Misurato su sequenze di fotogrammi non compressi a telecamera ferma: spento, il tremolio è circa 2,5 volte più basso che acceso, e più basso del gioco nativo; post-processing, atmosfera e sole vengono calcolati nell'ordine del gioco originale, quindi colori e alone del sole sono quelli originali. Puoi sempre riattivarlo nelle opzioni avanzate.
 - Corretto: dalla 1.0.2, con il post-processing a piena risoluzione acceso, i bordi contro il cielo (aste, pilastri, tetti, fogliame) potevano apparire a scalini. L'atmosfera, che disegna anche il cielo, ora usa una profondità a risoluzione piena e sfumata, con il jitter della telecamera compensato.
 - Nuova opzione avanzata *Bordi contro il cielo stabili* (accesa di default, solo con il post-processing a piena risoluzione): stabilizza nel tempo il confine tra oggetti e cielo, dimezzandone il tremolio. Anche i raggi del sole ora ricevono la profondità reale della scena.
+- Nuovo pulsante *Ripristina impostazioni consigliate* in cima al menu: con un clic (più una conferma) riporta tutte le opzioni grafiche al valore consigliato. Lingua del menu e tasti restano invariati.
 - Nuova opzione di diagnostica *Tasto sequenza fotogrammi* (senza tasto di default): salva 30 fotogrammi consecutivi non compressi in `BepInEx/OutwardFSR_captures`, utile per segnalare problemi di tremolio.
 
 ## 1.0.2 — 21/11/2026

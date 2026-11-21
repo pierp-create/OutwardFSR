@@ -34,6 +34,7 @@ The menu is available in English and Italian (setting *Menu language*, Auto = Wi
 | Setting | Default | Description |
 |---|---|---|
 | Menu language | Auto | English, Italiano or Auto (Windows language) |
+| Recommended settings | – | Button: puts every graphics option back to its recommended value (click twice to confirm). Menu language and keys are kept |
 | Active upscaler | – | Read-only: upscaler in use, its exact version (e.g. FSR 4.1.2) and resolutions |
 | Enabled | On | Turns upscaling on or off |
 | Toggle key | F9 | Toggles upscaling while playing |
@@ -127,6 +128,7 @@ Il menu è disponibile in italiano e in inglese (impostazione *Lingua del menu*,
 | Impostazione | Predefinito | Descrizione |
 |---|---|---|
 | Lingua del menu | Auto | English, Italiano o Auto (lingua di Windows) |
+| Impostazioni consigliate | – | Pulsante: riporta tutte le opzioni grafiche al valore consigliato (clicca due volte per confermare). Lingua del menu e tasti restano invariati |
 | Upscaler attivo | – | Solo lettura: upscaler in uso, versione esatta (ad es. FSR 4.1.2) e risoluzioni |
 | Attivo | Sì | Accende o spegne l'upscaling |
 | Tasto attiva/disattiva | F9 | Accende o spegne l'upscaling durante il gioco |
