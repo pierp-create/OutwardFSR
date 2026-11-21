@@ -128,6 +128,20 @@ namespace OutwardFSR
         private bool _useFsr4;
         private ComputeShader _fsr4Prepare;
         private RenderTexture _fsr4Depth, _fsr4Motion;
+        private RenderTexture _sceneDepthFull; // profondita' a risoluzione piena, senza jitter, per lo scattering
+        private RenderTexture _sceneDepthHist; // frame precedente (stabilizzazione nel tempo)
+
+        // Diagnostica (registrazione F11)
+        internal RenderTexture DebugSceneDepth => _sceneDepthFull;
+        internal RenderTexture DebugLowDepth => _fsr4Depth;
+        internal Vector2 DebugJitter => _desc.JitterOffset;
+        private ComputeShader _depthStab;
+        private bool _depthStabReset = true;
+        private bool _lastStab;
+        private static readonly int IdHistory = Shader.PropertyToID("_History");
+        private static readonly int IdOut = Shader.PropertyToID("_Out");
+        private static readonly int IdParams = Shader.PropertyToID("_Params");
+        private static readonly int IdSizes = Shader.PropertyToID("_Sizes");
         private RenderTexture _fsr4NoDepth; // profondita' vuota per FSR 4 (comportamento della 1.0.1, fogliame piu' nitido)
         private bool _fsr4UseDepth;
         private Fsr4Native.FrameParams _fsr4Params;
@@ -311,7 +325,7 @@ namespace OutwardFSR
             }
             if (_postFx != null)
             {
-                _postFx.DepthOverride = _fsr4Depth;
+                _postFx.DepthOverride = _sceneDepthFull != null ? (Texture)_sceneDepthFull : _fsr4Depth;
                 _postFx.SyncMovedEffects();
             }
 
@@ -434,6 +448,64 @@ namespace OutwardFSR
             cb.SetComputeTextureParam(_fsr4Prepare, 0, IdOutMotion, _fsr4Motion);
             cb.SetComputeIntParams(_fsr4Prepare, IdSize, w, h);
             cb.DispatchCompute(_fsr4Prepare, 0, (w + 7) / 8, (h + 7) / 8, 1);
+
+            // Copia a risoluzione piena per gli effetti spostati dopo FSR (scattering, che disegna anche il cielo).
+            // Filtro bilineare per bordi morbidi e compensazione del jitter, cosi' il confine oggetto/cielo
+            // non viene ritagliato a scalini dei pixel a bassa risoluzione e non trema da un frame all'altro.
+            if (_postFx != null && _postFx.HasMovedEffects)
+            {
+                // Stabilizzazione nel tempo del confine oggetto/cielo (opzione avanzata); senza, copia filtrata
+                // a risoluzione piena con il jitter compensato.
+                if (_depthStab == null && Plugin.AtmosphereStab.Value) _depthStab = FsrShaders.GetDepthStab();
+                bool stab = Plugin.AtmosphereStab.Value && _depthStab != null;
+                if (stab != _lastStab) { _depthStabReset = true; _lastStab = stab; }
+                if (_sceneDepthFull == null || _sceneDepthFull.width != _displaySize.x || _sceneDepthFull.height != _displaySize.y
+                    || (stab && _sceneDepthHist == null))
+                {
+                    ReleaseRT(ref _sceneDepthFull);
+                    ReleaseRT(ref _sceneDepthHist);
+                    _sceneDepthFull = NewRT("OutwardFSR_SceneDepthFull", _displaySize.x, _displaySize.y, RenderTextureFormat.RFloat, stab);
+                    _sceneDepthFull.filterMode = FilterMode.Bilinear;
+                    if (stab)
+                    {
+                        _sceneDepthHist = NewRT("OutwardFSR_SceneDepthHist", _displaySize.x, _displaySize.y, RenderTextureFormat.RFloat, true);
+                        _sceneDepthHist.filterMode = FilterMode.Bilinear;
+                    }
+                    _depthStabReset = true;
+                }
+
+                if (stab)
+                {
+                    // Scambio: il risultato del frame precedente diventa lo storico
+                    var t = _sceneDepthFull; _sceneDepthFull = _sceneDepthHist; _sceneDepthHist = t;
+                    // Compensazione del jitter nell'ordine di memoria della texture (asse Y invertito su DirectX)
+                    var param = new Vector4(_desc.JitterOffset.x / w, -_desc.JitterOffset.y / h, 0.9f,
+                        (_depthStabReset || _resetHistory) ? 1f : 0f);
+                    _depthStabReset = false;
+                    cb.SetComputeTextureParam(_depthStab, 0, IdInDepth, _fsr4Depth);
+                    cb.SetComputeTextureParam(_depthStab, 0, IdInMotion, _fsr4Motion);
+                    cb.SetComputeTextureParam(_depthStab, 0, IdHistory, _sceneDepthHist);
+                    cb.SetComputeTextureParam(_depthStab, 0, IdOut, _sceneDepthFull);
+                    cb.SetComputeVectorParam(_depthStab, IdParams, param);
+                    cb.SetComputeIntParams(_depthStab, IdSizes, _displaySize.x, _displaySize.y, w, h);
+                    cb.DispatchCompute(_depthStab, 0, (_displaySize.x + 7) / 8, (_displaySize.y + 7) / 8, 1);
+                }
+                else
+                {
+                    var jitterUv = new Vector2(_desc.JitterOffset.x / w, _desc.JitterOffset.y / h);
+                    cb.Blit(_fsr4Depth, _sceneDepthFull, Vector2.one, jitterUv);
+                }
+
+                _postFx.DepthOverride = _sceneDepthFull;
+                _postFx.ApplyDepthOverride();
+
+                // Anche la profondita' globale vista dal presenter (usata da altri passaggi degli effetti spostati)
+                if (_presenterDepthCb != null)
+                {
+                    _presenterDepthCb.Clear();
+                    _presenterDepthCb.SetGlobalTexture("_CameraDepthTexture", _sceneDepthFull);
+                }
+            }
         }
 
         private void BuildFsr4Commands()
@@ -477,7 +549,7 @@ namespace OutwardFSR
         private void EnsureFsr4(Vector2Int display, Vector2Int render)
         {
             _fsr4Depth = NewRT("OutwardFSR4_Depth", render.x, render.y, RenderTextureFormat.RFloat, true);
-            _fsr4Depth.filterMode = FilterMode.Point; // la profondita' non va mescolata tra oggetti e cielo
+            _fsr4Depth.filterMode = FilterMode.Bilinear; // filtrata solo nella copia a risoluzione piena per gli effetti
 
             // La profondita' reale serve agli effetti spostati (scattering). A FSR 4, salvo scelta dell'utente,
             // ne passiamo una vuota: con la profondita' FSR 4 e' piu' prudente sui bordi sottili e il fogliame
@@ -545,7 +617,7 @@ namespace OutwardFSR
                 if (_postFx != null && _postFx.HasMovedEffects)
                 {
                     _fsr4Depth = NewRT("OutwardFSR_Depth", render.x, render.y, RenderTextureFormat.RFloat, true);
-                    _fsr4Depth.filterMode = FilterMode.Point;
+                    _fsr4Depth.filterMode = FilterMode.Bilinear;
                     _fsr4Motion = NewRT("OutwardFSR_Motion", render.x, render.y, RenderTextureFormat.RGHalf, true);
                 }
             }
@@ -596,6 +668,8 @@ namespace OutwardFSR
             ReleaseRT(ref _fsr4Depth);
             ReleaseRT(ref _fsr4Motion);
             ReleaseRT(ref _fsr4NoDepth);
+            ReleaseRT(ref _sceneDepthFull);
+            ReleaseRT(ref _sceneDepthHist);
         }
 
         private static void ReleaseRT(ref RenderTexture rt)

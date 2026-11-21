@@ -252,6 +252,17 @@ namespace OutwardFSR
         }
 
         /// <summary>Ogni frame: copia i parametri aggiornati dal gioco e rispetta un'eventuale riaccensione.</summary>
+        /// <summary>Passa DepthOverride ai materiali dello scattering (chiamato anche durante il frame).</summary>
+        public void ApplyDepthOverride()
+        {
+            if (DepthOverride == null) return;
+            foreach (var e in _moved)
+                if (e.Copy != null && e.Copy.enabled)
+                    foreach (var f in MaterialFields(e.Copy.GetType()))
+                        if (f.GetValue(e.Copy) is Material mat && mat != null)
+                            mat.SetTexture(IdCameraDepth, DepthOverride);
+        }
+
         public void SyncMovedEffects()
         {
             foreach (var e in _moved)
@@ -266,7 +277,7 @@ namespace OutwardFSR
                 CopyFields(e);
 
                 // Profondita' della scena: il presenter non disegna geometria, la sua profondita' e' vuota
-                if (DepthOverride != null && IsScattering(e) && e.Copy.enabled)
+                if (DepthOverride != null && e.Copy.enabled)
                     foreach (var f in MaterialFields(e.Copy.GetType()))
                         if (f.GetValue(e.Copy) is Material mat && mat != null)
                             mat.SetTexture(IdCameraDepth, DepthOverride);

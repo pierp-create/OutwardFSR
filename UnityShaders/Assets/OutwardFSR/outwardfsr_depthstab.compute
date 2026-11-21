@@ -1,0 +1,60 @@
+// Profondita' della scena a risoluzione piena, stabilizzata nel tempo, per gli effetti che OutwardFSR
+// esegue dopo l'upscaling (scattering atmosferico di Time of Day, che disegna anche il cielo).
+//
+// La profondita' arriva a bassa risoluzione e con il jitter della telecamera: i dettagli piu' piccoli di un
+// pixel (angoli, punte, aste sottili) compaiono e scompaiono da un frame all'altro e il confine con il cielo
+// vibra. Qui, come fa FSR con il colore, si accumulano i frame precedenti riproiettati con i vettori di
+// movimento; il valore storico viene limitato all'intervallo dei vicini attuali per evitare scie.
+#pragma kernel CSMain
+
+Texture2D<float>  _InDepth;    // bassa risoluzione, con jitter (reversed Z: 0 = lontano)
+Texture2D<float2> _InMotion;   // bassa risoluzione, spostamento in UV (attuale - precedente)
+Texture2D<float>  _History;    // risoluzione piena, frame precedente
+RWTexture2D<float> _Out;       // risoluzione piena, risultato
+
+SamplerState sampler_LinearClamp;
+SamplerState sampler_PointClamp;
+
+float4 _Params;   // xy = compensazione jitter in UV, z = peso dello storico, w = 1 per azzerare lo storico
+uint4  _Sizes;    // xy = dimensione uscita, zw = dimensione ingresso
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _Sizes.x || id.y >= _Sizes.y)
+        return;
+
+    float2 uv   = (float2(id.xy) + 0.5) / float2(_Sizes.xy);
+    float2 inUv = uv + _Params.xy;
+    float2 texel = 1.0 / float2(_Sizes.zw);
+
+    float cur = _InDepth.SampleLevel(sampler_LinearClamp, inUv, 0);
+
+    // Intervallo dei vicini (3x3 texel a bassa risoluzione) per limitare lo storico
+    float mn = cur, mx = cur;
+    [unroll] for (int y = -1; y <= 1; y++)
+    {
+        [unroll] for (int x = -1; x <= 1; x++)
+        {
+            float d = _InDepth.SampleLevel(sampler_PointClamp, inUv + float2(x, y) * texel, 0);
+            mn = min(mn, d);
+            mx = max(mx, d);
+        }
+    }
+
+    float result = cur;
+    float2 mv = _InMotion.SampleLevel(sampler_PointClamp, inUv, 0);
+    float2 prevUv = uv - mv;
+    if (_Params.w < 0.5 && all(prevUv > 0.0) && all(prevUv < 1.0))
+    {
+        float h = _History.SampleLevel(sampler_LinearClamp, prevUv, 0);
+        h = clamp(h, mn, mx);
+        // Peso dello storico pieno a telecamera ferma, ridotto con il movimento (in pixel di uscita per
+        // frame): sui bordi oggetto/cielo lo storico non deve trascinarsi dietro le sagome.
+        float motionPx = length(mv * float2(_Sizes.xy));
+        float weight = _Params.z * saturate(1.0 - motionPx / 6.0);
+        result = lerp(cur, h, weight);
+    }
+
+    _Out[id.xy] = result;
+}

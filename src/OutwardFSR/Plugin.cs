@@ -11,7 +11,7 @@ namespace OutwardFSR
     {
         public const string Guid = "com.outwardfsr.mod";
         public const string Name = "Outward FSR";
-        public const string Version = "1.0.2";
+        public const string Version = "1.0.3";
 
         internal static ManualLogSource Log;
 
@@ -30,6 +30,7 @@ namespace OutwardFSR
         internal static ConfigEntry<float> RenderScale;
         internal static ConfigEntry<DepthSource> FsrDepthSource;
         internal static ConfigEntry<bool> Fsr4UseDepth;
+        internal static ConfigEntry<bool> AtmosphereStab;
         internal static ConfigEntry<bool> FsrReactive;
         internal static ConfigEntry<bool> FsrAutoTcr;
         internal static ConfigEntry<MipBiasMode> MipBiasSetting;
@@ -40,6 +41,7 @@ namespace OutwardFSR
         internal static ConfigEntry<bool> VerboseStats;
         internal static ConfigEntry<KeyboardShortcut> DumpKey;
         internal static ConfigEntry<KeyboardShortcut> SnapshotKey;
+        internal static ConfigEntry<KeyboardShortcut> CaptureKey;
 
         internal static ConfigEntry<MenuLanguage> Language;
 
@@ -178,9 +180,9 @@ namespace OutwardFSR
                 "Mantiene le texture nitide nonostante la risoluzione ridotta. Moderate = equilibrato (consigliato); AMD = valore di riferimento AMD, piu' nitido ma con piu' sfarfallio sulle superfici fini.", 55);
 
             // ---------------- 2. Advanced ----------------
-            FullResPostFx = Bind(Advanced, "Full-resolution post-processing", "Post-processing a piena risoluzione", true,
-                "Recommended. Runs bloom, color grading and vignette AFTER upscaling, at full resolution, and gives FSR the HDR image as AMD recommends. Turn it off only if other graphics mods conflict.",
-                "Consigliato. Esegue bloom, color grading e vignettatura DOPO l'upscaling, a risoluzione piena, e fornisce a FSR l'immagine HDR come raccomanda AMD. Disattivalo solo in caso di problemi con altre mod grafiche.",
+            FullResPostFx = Bind(Advanced, "Full-resolution post-processing", "Post-processing a piena risoluzione", false,
+                "Off (recommended): the whole image, post-processing, atmosphere and sun included, is rendered in the original game's order and then upscaled; this is the most stable and faithful result. On: bloom, color grading, atmosphere and sun rays run AFTER upscaling at full resolution; slightly sharper effects, but edges against the sky shimmer more.",
+                "Spento (consigliato): l'intera immagine, post-processing, atmosfera e sole compresi, viene calcolata nell'ordine del gioco originale e poi ingrandita; e' il risultato piu' stabile e fedele. Acceso: bloom, color grading, atmosfera e raggi del sole vengono applicati DOPO l'upscaling a risoluzione piena; effetti un po' piu' definiti, ma i bordi contro il cielo tremolano di piu'.",
                 100, null, true);
 
             FsrReactive = Bind(Advanced, "Automatic reactive mask (FSR 3.1 only)", "Maschera reattiva automatica (solo FSR 3.1)", false,
@@ -211,6 +213,11 @@ namespace OutwardFSR
                 "Sperimentale. Passa la profondita' della scena anche a FSR 4. Puo' ridurre le scie attorno agli oggetti in movimento, ma il fogliame sottile risulta meno nitido. Atmosfera e alone del sole la ricevono sempre.",
                 69, null, true);
 
+            AtmosphereStab = Bind(Advanced, "Stable sky edges", "Bordi contro il cielo stabili", true,
+                "With full-resolution post-processing: stabilises over time the edge between objects and sky drawn by the atmosphere, so thin details against the sky do not shimmer.",
+                "Con il post-processing a piena risoluzione: stabilizza nel tempo il confine tra oggetti e cielo disegnato dall'atmosfera, cosi' i dettagli sottili contro il cielo non tremolano.",
+                69, null, true);
+
             // ---------------- 3. Diagnostics ----------------
             FsrDebugView = Bind(Diagnostics, "Debug view (FSR 3.1 only)", "Vista di debug (solo FSR 3.1)", false,
                 "Shows the FSR debug view (motion vectors, depth, reactivity).",
@@ -232,6 +239,20 @@ namespace OutwardFSR
             SnapshotKey = Bind(Diagnostics, "Save images key", "Tasto salva immagini", new KeyboardShortcut(KeyCode.None),
                 "Saves the low-resolution and the upscaled image to the BepInEx folder. No key by default.",
                 "Salva nella cartella BepInEx l'immagine a bassa risoluzione e quella upscalata. Nessun tasto di default.", 70, null, true);
+
+            CaptureKey = Bind(Diagnostics, "Frame sequence key", "Tasto sequenza fotogrammi", new KeyboardShortcut(KeyCode.None),
+                $"Saves {FrameCapture.FrameCount} consecutive uncompressed frames to BepInEx/OutwardFSR_captures, to analyse shimmering. Keep the camera still.",
+                $"Salva {FrameCapture.FrameCount} fotogrammi consecutivi non compressi in BepInEx/OutwardFSR_captures, per analizzare il tremolio. Tieni ferma la telecamera.", 60, null, true);
+
+            // Migrazione una tantum: dalla 1.0.3 il post-processing a piena risoluzione e' spento di default
+            // (misure: circa 2,5 volte meno tremolio). Le configurazioni esistenti lo avevano acceso.
+            var revision = Config.Bind("Internal", "Settings revision", 0,
+                new ConfigDescription("", null, new ConfigurationManagerAttributes { Browsable = false }));
+            if (revision.Value < 1)
+            {
+                FullResPostFx.Value = false;
+                revision.Value = 1;
+            }
 
             ApplyLanguage();
             Language.SettingChanged += (_, __) => { ApplyLanguage(); _refreshMenu = true; };
@@ -257,9 +278,20 @@ namespace OutwardFSR
             GUILayout.Label(CurrentStatus(), GUILayout.ExpandWidth(true));
         }
 
+        internal static string NoticeText;
+        internal static bool HideNotice;
+
+        /// <summary>Mostra un avviso a schermo al posto dello stato (usato dalla registrazione fotogrammi).</summary>
+        internal static void ShowNotice(string text, float seconds)
+        {
+            NoticeText = text;
+            _toastUntil = Time.unscaledTime + seconds;
+        }
+
         private void OnGUI()
         {
-            if (!ShowToast.Value || Time.unscaledTime > _toastUntil) return;
+            if (HideNotice || Time.unscaledTime > _toastUntil) return;
+            if (!ShowToast.Value && NoticeText == null) return;
 
             if (_toastStyle == null)
             {
@@ -270,7 +302,7 @@ namespace OutwardFSR
             int pad = _toastStyle.fontSize / 2;
             _toastStyle.padding = new RectOffset(pad, pad, pad / 2, pad / 2);
 
-            var text = new GUIContent("Outward FSR: " + CurrentStatus());
+            var text = new GUIContent("Outward FSR: " + (NoticeText ?? CurrentStatus()));
             Vector2 size = _toastStyle.CalcSize(text);
             float margin = Screen.height / 40f;
             GUI.Box(new Rect(Screen.width - size.x - margin, margin, size.x, size.y), text, _toastStyle);
@@ -287,6 +319,7 @@ namespace OutwardFSR
 
             if (ToggleKey.Value.IsDown())
             {
+                NoticeText = null;
                 _toastUntil = Time.unscaledTime + 3f;
                 ScalingEnabled.Value = !ScalingEnabled.Value;
                 Log.LogInfo($"Upscaling {(ScalingEnabled.Value ? "ATTIVO" : "disattivato")} ({Upscaler.Value}, {FsrQuality.Value})");
@@ -298,6 +331,9 @@ namespace OutwardFSR
             Fsr4Native.Pump();
             LowResController.Tick();
             FrameStats.Tick(FrameStatsEnabled.Value, 10f, LowResController.Active != null);
+
+            if (CaptureKey.Value.MainKey != KeyCode.None && CaptureKey.Value.IsDown())
+                FrameCapture.Begin(this);
 
             if (SnapshotKey.Value.MainKey != KeyCode.None && SnapshotKey.Value.IsDown())
             {

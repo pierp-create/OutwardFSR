@@ -12,7 +12,7 @@ Outward FSR renders the game at a lower internal resolution and reconstructs a s
 - **AMD FSR 3.1**, built into the mod. It works on any DirectX 11 GPU with compute shader support, including NVIDIA and Intel.
 - **Automatic fallback:** if FSR 4 cannot start, the mod switches to FSR 3.1 by itself and writes the reason to the BepInEx log.
 - **Full-resolution UI:** menus, HUD and text are always drawn at native resolution.
-- **Full-resolution post-processing:** bloom, color grading and vignette run *after* upscaling, at native resolution, on a clean image.
+- **Faithful to the original:** by default post-processing, atmosphere and sun are rendered in the game's original order and then upscaled; with a still camera the image shimmers less than the native game. Optional *Full-resolution post-processing* runs these effects after upscaling instead.
 - **Texture sharpness (mipmap bias):** keeps textures as detailed as at native resolution.
 - **Live toggle with F9**, to compare with native rendering at any time.
 
@@ -57,7 +57,7 @@ Advanced and diagnostic settings appear when *Advanced settings* is ticked in th
 ## Compatibility
 
 - Tested together with Outward UE5 Overhaul, SideLoader, Sinai's Utility Pack and More Map Details.
-- Mods that heavily change the camera or post-processing may conflict. If you see problems, try turning off *Full-resolution post-processing* in the advanced settings.
+- Mods that heavily change the camera or post-processing may conflict. If you see problems, make sure *Full-resolution post-processing* is off (the default) in the advanced settings.
 - Not compatible with forcing the game into DirectX 12 or Vulkan (`-force-d3d12`, `-force-vulkan`).
 
 ## First start
@@ -69,6 +69,7 @@ There is nothing to compile or set up: the shaders are already compiled and incl
 - The automatic reactive mask is only used by the built-in FSR 3.1 and is off by default: it reduces trails behind fire and particles but increases shimmering on glass and reflections. FSR 4 handles these cases on its own.
 - Toggling with F9 or changing settings recreates FSR, which can cause a short hitch.
 - FSR 3.1 can leave light trails around foliage: turn on *Automatic reactive mask (FSR 3.1 only)* to remove them.
+- With *Full-resolution post-processing* on, thin details against the sky shimmer more than with it off (the default). *Stable sky edges* reduces it.
 
 ## Feedback and bug reports
 
@@ -104,7 +105,7 @@ Outward FSR fa renderizzare il gioco a una risoluzione interna più bassa e rico
 - **AMD FSR 3.1**, integrato nella mod. Funziona su qualsiasi scheda DirectX 11 con compute shader, comprese NVIDIA e Intel.
 - **Ripiego automatico:** se FSR 4 non può partire, la mod passa da sola a FSR 3.1 e scrive il motivo nel log di BepInEx.
 - **Interfaccia a risoluzione piena:** menu, HUD e testi restano sempre alla risoluzione nativa.
-- **Post-processing a risoluzione piena:** bloom, color grading e vignettatura vengono applicati *dopo* l'upscaling, alla risoluzione nativa e su un'immagine pulita.
+- **Fedele all'originale:** di default post-processing, atmosfera e sole vengono calcolati nell'ordine originale del gioco e poi ingranditi; a telecamera ferma l'immagine tremola meno del gioco nativo. L'opzione *Post-processing a piena risoluzione* applica invece questi effetti dopo l'upscaling.
 - **Nitidezza delle texture (mipmap bias):** le texture restano dettagliate come alla risoluzione nativa.
 - **Attivazione al volo con F9**, per confrontare in qualsiasi momento con il rendering nativo.
 
@@ -149,7 +150,7 @@ Le opzioni avanzate e di diagnostica compaiono spuntando *Advanced settings* nel
 ## Compatibilità
 
 - Provata insieme a Outward UE5 Overhaul, SideLoader, Sinai's Utility Pack e More Map Details.
-- Le mod che modificano pesantemente la telecamera o il post-processing potrebbero entrare in conflitto. In caso di problemi, prova a disattivare *Post-processing a piena risoluzione* nelle opzioni avanzate.
+- Le mod che modificano pesantemente la telecamera o il post-processing potrebbero entrare in conflitto. In caso di problemi, controlla che *Post-processing a piena risoluzione* sia spento (predefinito) nelle opzioni avanzate.
 - Non è compatibile con il gioco forzato in DirectX 12 o Vulkan (`-force-d3d12`, `-force-vulkan`).
 
 ## Primo avvio
@@ -161,6 +162,7 @@ Non c'è niente da compilare né da configurare: gli shader sono già compilati 
 - La maschera reattiva automatica è usata solo dall'FSR 3.1 integrato ed è spenta di default: riduce le scie dietro fuoco e particelle ma aumenta lo sfarfallio su vetri e riflessi. FSR 4 gestisce questi casi da solo.
 - Attivare o disattivare con F9, o cambiare le impostazioni, ricrea FSR e può causare un breve scatto.
 - FSR 3.1 può lasciare leggere scie attorno al fogliame: attiva *Maschera reattiva automatica (solo FSR 3.1)* per eliminarle.
+- Con *Post-processing a piena risoluzione* acceso, i dettagli sottili contro il cielo tremolano di più che con l'opzione spenta (predefinita). *Bordi contro il cielo stabili* lo riduce.
 
 ## Segnalazioni e suggerimenti
 

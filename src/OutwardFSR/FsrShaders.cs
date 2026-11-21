@@ -17,6 +17,22 @@ namespace OutwardFSR
         private static bool _prepareAttempted;
         private static ComputeShader _fsr4Prepare;
 
+        private static bool _depthStabAttempted;
+        private static ComputeShader _depthStab;
+
+        /// <summary>Compute shader che stabilizza nel tempo la profondita' a risoluzione piena (puo' mancare).</summary>
+        public static ComputeShader GetDepthStab()
+        {
+            if (_depthStabAttempted) return _depthStab;
+            Get();
+            _depthStabAttempted = true;
+            if (_bundle == null) return null;
+            _depthStab = _bundle.LoadAsset<ComputeShader>("outwardfsr_depthstab");
+            if (_depthStab == null)
+                Plugin.Log.LogWarning("Shader 'outwardfsr_depthstab' non presente nel bundle: profondita' per l'atmosfera senza stabilizzazione.");
+            return _depthStab;
+        }
+
         /// <summary>Compute shader che prepara profondità e vettori di movimento per FSR 4.</summary>
         public static ComputeShader GetFsr4Prepare()
         {
