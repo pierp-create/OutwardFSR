@@ -11,7 +11,7 @@ namespace OutwardFSR
     {
         public const string Guid = "com.outwardfsr.mod";
         public const string Name = "Outward FSR";
-        public const string Version = "1.0.1";
+        public const string Version = "1.0.2";
 
         internal static ManualLogSource Log;
 
@@ -29,6 +29,7 @@ namespace OutwardFSR
         internal static ConfigEntry<bool> FsrSharpen;
         internal static ConfigEntry<float> RenderScale;
         internal static ConfigEntry<DepthSource> FsrDepthSource;
+        internal static ConfigEntry<bool> Fsr4UseDepth;
         internal static ConfigEntry<bool> FsrReactive;
         internal static ConfigEntry<bool> FsrAutoTcr;
         internal static ConfigEntry<MipBiasMode> MipBiasSetting;
@@ -204,6 +205,11 @@ namespace OutwardFSR
             FsrDepthSource = Bind(Advanced, "Depth source", "Sorgente profondita'", DepthSource.CameraDepthTexture,
                 "Depth buffer passed to FSR. Change it only if you see trails or strange artifacts.",
                 "Buffer di profondita' passato a FSR. Cambialo solo se compaiono scie o artefatti strani.", 70, null, true);
+
+            Fsr4UseDepth = Bind(Advanced, "Scene depth for FSR 4", "Profondita' scena per FSR 4", false,
+                "Experimental. Also gives the scene depth to FSR 4. It can reduce trails around moving objects, but thin foliage looks less sharp. The atmosphere and sun glow always receive the depth.",
+                "Sperimentale. Passa la profondita' della scena anche a FSR 4. Puo' ridurre le scie attorno agli oggetti in movimento, ma il fogliame sottile risulta meno nitido. Atmosfera e alone del sole la ricevono sempre.",
+                69, null, true);
 
             // ---------------- 3. Diagnostics ----------------
             FsrDebugView = Bind(Diagnostics, "Debug view (FSR 3.1 only)", "Vista di debug (solo FSR 3.1)", false,

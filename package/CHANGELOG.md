@@ -2,6 +2,13 @@
 
 *Italian version below — Versione italiana più sotto.*
 
+## 1.0.2 — 2026-11-21
+
+- Fixed: with *Full-resolution post-processing* on, the sun glow and the atmosphere (Time of Day scattering and sun rays) now run after tonemapping as in the original game. The sun has its full warm halo again and the image is no longer darker than native.
+- Fixed: the scene depth was read from a texture that was always empty at that point of the frame. The atmosphere now receives the real depth.
+- FSR 4 keeps working without scene depth as in 1.0.1, because it keeps thin foliage sharper. New advanced option *Scene depth for FSR 4* (off by default) to try it with depth: it can reduce trails around moving objects, but foliage looks less sharp.
+- FSR 3.1: if you see trails around foliage, turn on *Automatic reactive mask (FSR 3.1 only)*.
+
 ## 1.0.1 — 2026-11-20
 
 - New: the settings menu is available in English and Italian (setting "Menu language", Auto = Windows language).
@@ -42,6 +49,13 @@ First public release.
 ---
 
 # Registro delle modifiche (Italiano)
+
+## 1.0.2 — 21/11/2026
+
+- Corretto: con *Post-processing a piena risoluzione* attivo, l'alone del sole e l'atmosfera (scattering e raggi del sole di Time of Day) ora vengono applicati dopo il tonemapping, come nel gioco originale. Il sole ha di nuovo il suo grande alone caldo e l'immagine non risulta più scura del nativo.
+- Corretto: la profondità della scena veniva letta da una texture che in quel punto del frame era sempre vuota. Ora l'atmosfera riceve la profondità reale.
+- FSR 4 continua a lavorare senza profondità della scena come nella 1.0.1, perché così il fogliame sottile resta più nitido. Nuova opzione avanzata *Profondità scena per FSR 4* (spenta di default) per provarlo con la profondità: può ridurre le scie attorno agli oggetti in movimento, ma il fogliame risulta meno nitido.
+- FSR 3.1: se noti scie attorno alle foglie, attiva *Maschera reattiva automatica (solo FSR 3.1)*.
 
 ## 1.0.1 — 20/11/2026
 

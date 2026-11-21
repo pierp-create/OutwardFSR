@@ -95,6 +95,7 @@ namespace OutwardFSR
         private RenderTexture _lowRes;
         private Camera _presenter;
         private CommandBuffer _presentCb;
+        private CommandBuffer _presenterDepthCb; // profondita' per gli effetti spostati sul presenter
 
         // --- FSR ---
         private bool _useFsr;
@@ -127,6 +128,8 @@ namespace OutwardFSR
         private bool _useFsr4;
         private ComputeShader _fsr4Prepare;
         private RenderTexture _fsr4Depth, _fsr4Motion;
+        private RenderTexture _fsr4NoDepth; // profondita' vuota per FSR 4 (comportamento della 1.0.1, fogliame piu' nitido)
+        private bool _fsr4UseDepth;
         private Fsr4Native.FrameParams _fsr4Params;
         private static readonly int IdInDepth = Shader.PropertyToID("_InDepth");
         private static readonly int IdInMotion = Shader.PropertyToID("_InMotion");
@@ -173,6 +176,7 @@ namespace OutwardFSR
             _upscalerSetting != Plugin.Upscaler.Value ||
             _quality != (Fsr3Upscaler.QualityMode)(int)Plugin.FsrQuality.Value ||
             _depthSource != Plugin.FsrDepthSource.Value ||
+            _fsr4UseDepth != Plugin.Fsr4UseDepth.Value ||
             _splitPostFxSetting != Plugin.FullResPostFx.Value ||
             _useReactive != (_useFsr && Plugin.FsrReactive.Value) ||
             _mipMode != Plugin.MipBiasSetting.Value ||
@@ -185,6 +189,7 @@ namespace OutwardFSR
             _upscalerSetting = Plugin.Upscaler.Value;
             _quality = (Fsr3Upscaler.QualityMode)(int)Plugin.FsrQuality.Value;
             _depthSource = Plugin.FsrDepthSource.Value;
+            _fsr4UseDepth = Plugin.Fsr4UseDepth.Value;
             _splitPostFxSetting = Plugin.FullResPostFx.Value;
             _mipMode = Plugin.MipBiasSetting.Value;
 
@@ -205,6 +210,9 @@ namespace OutwardFSR
                 // Creato inattivo: l'eventuale PostProcessLayer va inizializzato prima dell'accensione
                 var go = new GameObject("OutwardFSR_Presenter") { hideFlags = HideFlags.DontSave };
                 go.SetActive(false);
+                // Figlio della telecamera principale: stessa posizione e orientamento (serve agli effetti
+                // che usano la posizione del sole sullo schermo, come i raggi di Time of Day)
+                go.transform.SetParent(_cam.transform, false);
                 _presenter = go.AddComponent<Camera>();
                 _presenter.cullingMask = 0;
                 _presenter.clearFlags = CameraClearFlags.Nothing;
@@ -221,6 +229,22 @@ namespace OutwardFSR
                     _postFx = PostFxSplit.TryCreate(_cam, _presenter);
                 // Con il post-processing a piena risoluzione il presenter lavora in HDR
                 _presenter.allowHDR = _postFx != null;
+
+                // Effetti finali del gioco (raggi del sole...) dopo il tonemapping, come nell'originale.
+                // Servono la profondita' della scena: la copiamo con lo shader di preparazione (solo FSR 3.1/4).
+                if (_postFx != null && Temporal)
+                {
+                    if (_fsr4Prepare == null) _fsr4Prepare = FsrShaders.GetFsr4Prepare();
+                    if (_fsr4Prepare != null)
+                    {
+                        _postFx.MoveFinalEffects(_cam, _presenter);
+                        if (_postFx.HasMovedEffects)
+                        {
+                            _presenterDepthCb = new CommandBuffer { name = "OutwardFSR: profondita' per effetti finali" };
+                            _presenter.AddCommandBuffer(CameraEvent.BeforeImageEffects, _presenterDepthCb);
+                        }
+                    }
+                }
 
                 // La copia a schermo avviene prima che il presenter disegni qualsiasi cosa
                 _presentCb = new CommandBuffer { name = "OutwardFSR: present" };
@@ -279,6 +303,18 @@ namespace OutwardFSR
             if (_cam.targetTexture != null && _cam.targetTexture != _lowRes)
                 return; // il gioco usa già una sua RenderTexture: non tocchiamo nulla
 
+            if (_presenter != null)
+            {
+                _presenter.fieldOfView = _cam.fieldOfView;
+                _presenter.nearClipPlane = _cam.nearClipPlane;
+                _presenter.farClipPlane = _cam.farClipPlane;
+            }
+            if (_postFx != null)
+            {
+                _postFx.DepthOverride = _fsr4Depth;
+                _postFx.SyncMovedEffects();
+            }
+
             var size = ComputeRenderSize();
             EnsureTexture(size.x, size.y);
             if (Temporal) EnsureFsr(new Vector2Int(Screen.width, Screen.height), size);
@@ -317,6 +353,8 @@ namespace OutwardFSR
         private void BuildFsrCommands()
         {
             _fsrCb.Clear();
+            if (_postFx != null && _postFx.HasMovedEffects && _fsr4Depth != null)
+                AddPrepareDispatch(_fsrCb); // profondita' per gli effetti spostati sul presenter
 
             _desc.Color = new ResourceView(_lowRes);
             _desc.Depth = _depthSource == DepthSource.CameraDepthTexture
@@ -381,21 +419,30 @@ namespace OutwardFSR
             FsrDispatchCount++;
         }
 
+        /// <summary>Copia profondita' e vettori di movimento in _fsr4Depth / _fsr4Motion.</summary>
+        private void AddPrepareDispatch(CommandBuffer cb)
+        {
+            int w = _renderSize.x, h = _renderSize.y;
+            // ResolvedDepth e' l'unico identificatore che contiene la profondita' reale a questo punto del frame
+            // (BuiltinRenderTextureType.Depth qui restituisce una texture vuota).
+            var depth = _depthSource == DepthSource.CameraDepthTexture
+                ? new RenderTargetIdentifier(BuiltinRenderTextureType.ResolvedDepth)
+                : new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
+            cb.SetComputeTextureParam(_fsr4Prepare, 0, IdInDepth, depth, 0, RenderTextureSubElement.Depth);
+            cb.SetComputeTextureParam(_fsr4Prepare, 0, IdInMotion, BuiltinRenderTextureType.MotionVectors);
+            cb.SetComputeTextureParam(_fsr4Prepare, 0, IdOutDepth, _fsr4Depth);
+            cb.SetComputeTextureParam(_fsr4Prepare, 0, IdOutMotion, _fsr4Motion);
+            cb.SetComputeIntParams(_fsr4Prepare, IdSize, w, h);
+            cb.DispatchCompute(_fsr4Prepare, 0, (w + 7) / 8, (h + 7) / 8, 1);
+        }
+
         private void BuildFsr4Commands()
         {
             _fsrCb.Clear();
             int w = _renderSize.x, h = _renderSize.y;
 
             // 1) Profondità e vettori di movimento in texture che il plugin nativo può leggere
-            var depth = _depthSource == DepthSource.CameraDepthTexture
-                ? new RenderTargetIdentifier(BuiltinRenderTextureType.Depth)
-                : new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget);
-            _fsrCb.SetComputeTextureParam(_fsr4Prepare, 0, IdInDepth, depth, 0, RenderTextureSubElement.Depth);
-            _fsrCb.SetComputeTextureParam(_fsr4Prepare, 0, IdInMotion, BuiltinRenderTextureType.MotionVectors);
-            _fsrCb.SetComputeTextureParam(_fsr4Prepare, 0, IdOutDepth, _fsr4Depth);
-            _fsrCb.SetComputeTextureParam(_fsr4Prepare, 0, IdOutMotion, _fsr4Motion);
-            _fsrCb.SetComputeIntParams(_fsr4Prepare, IdSize, w, h);
-            _fsrCb.DispatchCompute(_fsr4Prepare, 0, (w + 7) / 8, (h + 7) / 8, 1);
+            AddPrepareDispatch(_fsrCb);
 
             // 2) FSR 4 (DirectX 12) tramite il plugin nativo
             var p = _fsr4Params;
@@ -430,6 +477,19 @@ namespace OutwardFSR
         private void EnsureFsr4(Vector2Int display, Vector2Int render)
         {
             _fsr4Depth = NewRT("OutwardFSR4_Depth", render.x, render.y, RenderTextureFormat.RFloat, true);
+            _fsr4Depth.filterMode = FilterMode.Point; // la profondita' non va mescolata tra oggetti e cielo
+
+            // La profondita' reale serve agli effetti spostati (scattering). A FSR 4, salvo scelta dell'utente,
+            // ne passiamo una vuota: con la profondita' FSR 4 e' piu' prudente sui bordi sottili e il fogliame
+            // risulta meno nitido.
+            if (!_fsr4UseDepth)
+            {
+                _fsr4NoDepth = NewRT("OutwardFSR4_NoDepth", render.x, render.y, RenderTextureFormat.RFloat, true);
+                var prev = RenderTexture.active;
+                RenderTexture.active = _fsr4NoDepth;
+                GL.Clear(false, true, Color.clear);
+                RenderTexture.active = prev;
+            }
             _fsr4Motion = NewRT("OutwardFSR4_Motion", render.x, render.y, RenderTextureFormat.RGHalf, true);
 
             int flags = SystemInfo.usesReversedZBuffer ? Fsr4Native.FlagDepthInverted : 0;
@@ -439,7 +499,7 @@ namespace OutwardFSR
             _fsr4Params = new Fsr4Native.FrameParams
             {
                 Color = _lowRes.GetNativeTexturePtr(),
-                Depth = _fsr4Depth.GetNativeTexturePtr(),
+                Depth = (_fsr4UseDepth ? _fsr4Depth : _fsr4NoDepth).GetNativeTexturePtr(),
                 Motion = _fsr4Motion.GetNativeTexturePtr(),
                 Output = _upscaled.GetNativeTexturePtr(),
                 RenderW = render.x,
@@ -482,6 +542,18 @@ namespace OutwardFSR
                     ? Fsr3Upscaler.InitializationFlags.EnableHighDynamicRange | Fsr3Upscaler.InitializationFlags.EnableAutoExposure
                     : 0;
                 _context = Fsr3Upscaler.CreateContext(display, render, FsrShaders.Get(), flags);
+                if (_postFx != null && _postFx.HasMovedEffects)
+                {
+                    _fsr4Depth = NewRT("OutwardFSR_Depth", render.x, render.y, RenderTextureFormat.RFloat, true);
+                    _fsr4Depth.filterMode = FilterMode.Point;
+                    _fsr4Motion = NewRT("OutwardFSR_Motion", render.x, render.y, RenderTextureFormat.RGHalf, true);
+                }
+            }
+            if (_presenterDepthCb != null)
+            {
+                _presenterDepthCb.Clear();
+                if (_fsr4Depth != null)
+                    _presenterDepthCb.SetGlobalTexture("_CameraDepthTexture", _fsr4Depth);
             }
             if (_useReactive)
             {
@@ -523,6 +595,7 @@ namespace OutwardFSR
             }
             ReleaseRT(ref _fsr4Depth);
             ReleaseRT(ref _fsr4Motion);
+            ReleaseRT(ref _fsr4NoDepth);
         }
 
         private static void ReleaseRT(ref RenderTexture rt)
@@ -664,6 +737,8 @@ namespace OutwardFSR
                 Destroy(_presenter.gameObject);
             _presentCb?.Release();
             _presentCb = null;
+            _presenterDepthCb?.Release();
+            _presenterDepthCb = null;
         }
     }
 

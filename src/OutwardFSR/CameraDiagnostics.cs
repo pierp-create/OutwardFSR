@@ -46,6 +46,26 @@ namespace OutwardFSR
                 if (ppl != null)
                 {
                     sb.AppendLine($"    PostProcessLayer: AA={ppl.antialiasingMode} volumeLayer=0x{ppl.volumeLayer.value:X8} trigger={(ppl.volumeTrigger ? ppl.volumeTrigger.name : "null")} stopNaN={ppl.stopNaNPropagation}");
+                    // Valori effettivi dopo la miscela dei volumi (per confrontare telecamera principale e presenter)
+                    try
+                    {
+                        var bloom = ppl.GetSettings<Bloom>();
+                        if (bloom != null)
+                            sb.AppendLine($"      Bloom: attivo={bloom.enabled.value} intensita={bloom.intensity.value:F2} soglia={bloom.threshold.value:F2} " +
+                                          $"softKnee={bloom.softKnee.value:F2} diffusione={bloom.diffusion.value:F2} fast={bloom.fastMode.value}");
+                        var ae = ppl.GetSettings<AutoExposure>();
+                        if (ae != null)
+                            sb.AppendLine($"      AutoExposure: attivo={ae.enabled.value} min={ae.minLuminance.value:F2} max={ae.maxLuminance.value:F2} " +
+                                          $"key={ae.keyValue.value:F2} tipo={ae.eyeAdaptation.value}");
+                        var cg = ppl.GetSettings<ColorGrading>();
+                        if (cg != null)
+                            sb.AppendLine($"      ColorGrading: attivo={cg.enabled.value} modo={cg.gradingMode.value} tonemapper={cg.tonemapper.value} " +
+                                          $"postExposure={cg.postExposure.value:F2} saturazione={cg.saturation.value:F1} contrasto={cg.contrast.value:F1} temperatura={cg.temperature.value:F1}");
+                    }
+                    catch (Exception e)
+                    {
+                        sb.AppendLine("      (impossibile leggere gli effetti: " + e.Message + ")");
+                    }
                 }
 
                 foreach (CameraEvent evt in Enum.GetValues(typeof(CameraEvent)))
