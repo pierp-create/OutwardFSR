@@ -1,6 +1,6 @@
 {
   "name": "OutwardFSR",
-  "version_number": "1.0.3",
+  "version_number": "1.0.4",
   "website_url": "https://github.com/pierp-create/OutwardFSR",
   "description": "AMD FSR 4 (official AMD DLLs, ML on Radeon RX 9000) and FSR 3.1 upscaling for Outward Definitive Edition. Faithful to the original image, full-resolution UI, F9 toggle, automatic fallback.",
   "dependencies": [

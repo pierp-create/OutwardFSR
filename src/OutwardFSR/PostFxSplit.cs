@@ -314,9 +314,10 @@ namespace OutwardFSR
         // Chiamato da PPv2 per ogni telecamera, dopo aver mescolato i volumi
         private static void UpdateSettingsPostfix(object[] __args)
         {
-            if (_main == null || __args == null || __args.Length == 0) return;
+            if (__args == null || __args.Length == 0) return;
             var layer = __args[0] as PostProcessLayer;
             if (layer == null) return;
+            if (_main == null) return;
 
             if (layer == _main)
             {

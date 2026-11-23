@@ -2,6 +2,10 @@
 
 *Italian version below — Versione italiana più sotto.*
 
+## 1.0.4 — 2026-11-23
+
+- **Fixed: glint flicker on glass, metal and domes.** With upscaling, the game's bloom was computed on the jittered low-resolution image, so the glow around small reflections flashed from frame to frame. New advanced option *Stable bloom* (on by default) averages the bloom over time, reprojected with the motion vectors. Measured on uncompressed frame captures with a still camera: flicker on reflections is about 5 times lower and the same as the native game, with the same brightness. The order of the effects is unchanged, so edges against the sky stay clean.
+
 ## 1.0.3 — 2026-11-21
 
 - **Full-resolution post-processing is now off by default** (existing settings are switched off once on update). Measured on uncompressed frame captures with a still camera: with it off, shimmering is about 2.5 times lower than with it on, and lower than the native game; post-processing, atmosphere and sun are rendered in the original game's order, so colours and sun glow match the original. You can still turn it on in the advanced settings.
@@ -57,6 +61,10 @@ First public release.
 ---
 
 # Registro delle modifiche (Italiano)
+
+## 1.0.4 — 23/11/2026
+
+- **Corretto: scintillio dei riflessi su vetri, metalli e cupole.** Con l'upscaling il bloom del gioco veniva calcolato sull'immagine a bassa risoluzione con il jitter, quindi l'alone dei riflessi piccoli lampeggiava da un fotogramma all'altro. Nuova opzione avanzata *Bloom stabile* (accesa di default): media il bloom nel tempo, riproiettato con i vettori di movimento. Misurato su sequenze di fotogrammi non compressi a telecamera ferma: lo scintillio sui riflessi è circa 5 volte più basso e pari a quello del gioco nativo, con la stessa luminosità. L'ordine degli effetti non cambia, quindi i bordi contro il cielo restano puliti.
 
 ## 1.0.3 — 21/11/2026
 

@@ -121,7 +121,7 @@ namespace OutwardFSR
                 $"width={w}\nheight={h}\nformat=RGBA8\nframes={FrameCount}\nfailed={failed}\n" +
                 $"status={status}\nversion={Plugin.Version}\n" +
                 $"upscaler={Plugin.Upscaler.Value}\nquality={Plugin.FsrQuality.Value}\n" +
-                $"fullres_post={Plugin.FullResPostFx.Value}\nmip_bias={Plugin.MipBiasSetting.Value}\n" +
+                $"fullres_post={Plugin.FullResPostFx.Value}\nstable_bloom={Plugin.BloomStab.Value}\nmip_bias={Plugin.MipBiasSetting.Value}\n" +
                 $"reactive={Plugin.FsrReactive.Value}\nfsr4_depth={Plugin.Fsr4UseDepth.Value}\nstable_sky_edges={Plugin.AtmosphereStab.Value}\nsharpen={Plugin.FsrSharpen.Value}\nsharpness={Plugin.FsrSharpness.Value}\n" +
                 $"depth_full={fullW}x{fullH}\ndepth_low={lowW}x{lowH}\njitter={string.Join(",", jitters.ToArray())}\n" +
                 $"frame_ms={string.Join(",", times.ConvertAll(t => t.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)).ToArray())}\n";

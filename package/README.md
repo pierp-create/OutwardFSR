@@ -13,6 +13,7 @@ Outward FSR renders the game at a lower internal resolution and reconstructs a s
 - **Automatic fallback:** if FSR 4 cannot start, the mod switches to FSR 3.1 by itself and writes the reason to the BepInEx log.
 - **Full-resolution UI:** menus, HUD and text are always drawn at native resolution.
 - **Faithful to the original:** by default post-processing, atmosphere and sun are rendered in the game's original order and then upscaled; with a still camera the image shimmers less than the native game. Optional *Full-resolution post-processing* runs these effects after upscaling instead.
+- **Stable bloom:** the glow around small reflections (glass, metal, domes) does not flicker with upscaling, as in the native game.
 - **Texture sharpness (mipmap bias):** keeps textures as detailed as at native resolution.
 - **Live toggle with F9**, to compare with native rendering at any time.
 
@@ -107,6 +108,7 @@ Outward FSR fa renderizzare il gioco a una risoluzione interna più bassa e rico
 - **Ripiego automatico:** se FSR 4 non può partire, la mod passa da sola a FSR 3.1 e scrive il motivo nel log di BepInEx.
 - **Interfaccia a risoluzione piena:** menu, HUD e testi restano sempre alla risoluzione nativa.
 - **Fedele all'originale:** di default post-processing, atmosfera e sole vengono calcolati nell'ordine originale del gioco e poi ingranditi; a telecamera ferma l'immagine tremola meno del gioco nativo. L'opzione *Post-processing a piena risoluzione* applica invece questi effetti dopo l'upscaling.
+- **Bloom stabile:** l'alone attorno ai riflessi piccoli (vetri, metalli, cupole) non lampeggia con l'upscaling, come nel gioco nativo.
 - **Nitidezza delle texture (mipmap bias):** le texture restano dettagliate come alla risoluzione nativa.
 - **Attivazione al volo con F9**, per confrontare in qualsiasi momento con il rendering nativo.
 

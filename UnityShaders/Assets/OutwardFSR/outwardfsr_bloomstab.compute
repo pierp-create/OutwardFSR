@@ -1,0 +1,46 @@
+// Bloom stabilizzato nel tempo per OutwardFSR.
+//
+// Con l'upscaling il bloom del gioco viene calcolato sull'immagine a bassa risoluzione e con il jitter della
+// telecamera: i riflessi piccoli (vetri, metalli, cupole) cambiano da un frame all'altro e il loro alone
+// lampeggia. Qui si accumulano i frame precedenti del bloom (riproiettati con i vettori di movimento), cosi'
+// l'alone resta quello medio, fermo, come a risoluzione nativa. Il bloom e' molto sfocato, quindi lo storico
+// non crea scie visibili; con movimenti rapidi il peso dello storico scende.
+#pragma kernel CSMain
+
+Texture2D<float4>  _InBloom;   // bloom del frame attuale (meta' risoluzione di rendering)
+Texture2D<float2>  _InMotion;  // risoluzione di rendering, spostamento in UV (attuale - precedente)
+Texture2D<float4>  _History;   // bloom stabilizzato del frame precedente
+RWTexture2D<float4> _Out;      // bloom stabilizzato di questo frame
+
+SamplerState sampler_LinearClamp;
+
+float4 _Params;   // x = peso dello storico, y = 1 per azzerare lo storico
+uint4  _Sizes;    // xy = dimensione del bloom
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _Sizes.x || id.y >= _Sizes.y)
+        return;
+
+    float2 uv = (float2(id.xy) + 0.5) / float2(_Sizes.xy);
+    float4 cur = _InBloom.SampleLevel(sampler_LinearClamp, uv, 0);
+    float4 result = cur;
+
+    float2 mv = _InMotion.SampleLevel(sampler_LinearClamp, uv, 0);
+    float2 prevUv = uv - mv;
+    if (_Params.y < 0.5 && all(prevUv > 0.0) && all(prevUv < 1.0))
+    {
+        float4 h = _History.SampleLevel(sampler_LinearClamp, prevUv, 0);
+        // Protezione da valori non validi (NaN / infiniti) nello storico
+        if (all(h == h) && all(abs(h) < 65000.0))
+        {
+            // Peso pieno a telecamera ferma, ridotto con il movimento (pixel del bloom per frame)
+            float motionPx = length(mv * float2(_Sizes.xy));
+            float weight = _Params.x * saturate(1.0 - motionPx / 12.0);
+            result = lerp(cur, h, weight);
+        }
+    }
+
+    _Out[id.xy] = result;
+}

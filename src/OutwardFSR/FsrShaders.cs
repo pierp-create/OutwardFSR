@@ -33,6 +33,22 @@ namespace OutwardFSR
             return _depthStab;
         }
 
+        private static bool _bloomStabAttempted;
+        private static ComputeShader _bloomStab;
+
+        /// <summary>Compute shader che stabilizza nel tempo il bloom (puo' mancare).</summary>
+        public static ComputeShader GetBloomStab()
+        {
+            if (_bloomStabAttempted) return _bloomStab;
+            Get();
+            _bloomStabAttempted = true;
+            if (_bundle == null) return null;
+            _bloomStab = _bundle.LoadAsset<ComputeShader>("outwardfsr_bloomstab");
+            if (_bloomStab == null)
+                Plugin.Log.LogWarning("Shader 'outwardfsr_bloomstab' non presente nel bundle: bloom senza stabilizzazione.");
+            return _bloomStab;
+        }
+
         /// <summary>Compute shader che prepara profondità e vettori di movimento per FSR 4.</summary>
         public static ComputeShader GetFsr4Prepare()
         {

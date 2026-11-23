@@ -6,7 +6,7 @@
 
 - **FSR 4** uses AMD's official signed DLLs (FSR SDK 2.4) through a small native DirectX 11 → DirectX 12 bridge. The game keeps running in DirectX 11. On Radeon RX 9000 series GPUs it is the machine-learning upscaler.
 - **FSR 3.1** is built into the mod (based on FSR3Unity) and works on any DirectX 11 GPU. It is also the automatic fallback if FSR 4 cannot start.
-- The UI and the final post-processing (bloom, color grading, vignette) stay at full resolution.
+- The UI stays at full resolution. Post-processing runs in the game's original order (optionally after upscaling, at full resolution), and the bloom is stabilised over time so small reflections do not flicker.
 
 **Players:** install the mod from Thunderstore / r2modman. The full user guide is in [`package/README.md`](package/README.md) and the version history in [`package/CHANGELOG.md`](package/CHANGELOG.md).
 **Bugs and suggestions:** please open an [issue](https://github.com/pierp-create/OutwardFSR/issues).

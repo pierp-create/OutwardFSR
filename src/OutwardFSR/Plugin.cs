@@ -11,7 +11,7 @@ namespace OutwardFSR
     {
         public const string Guid = "com.outwardfsr.mod";
         public const string Name = "Outward FSR";
-        public const string Version = "1.0.3";
+        public const string Version = "1.0.4";
 
         internal static ManualLogSource Log;
 
@@ -31,6 +31,7 @@ namespace OutwardFSR
         internal static ConfigEntry<DepthSource> FsrDepthSource;
         internal static ConfigEntry<bool> Fsr4UseDepth;
         internal static ConfigEntry<bool> AtmosphereStab;
+        internal static ConfigEntry<bool> BloomStab;
         internal static ConfigEntry<bool> FsrReactive;
         internal static ConfigEntry<bool> FsrAutoTcr;
         internal static ConfigEntry<MipBiasMode> MipBiasSetting;
@@ -226,6 +227,11 @@ namespace OutwardFSR
                 "Con il post-processing a piena risoluzione: stabilizza nel tempo il confine tra oggetti e cielo disegnato dall'atmosfera, cosi' i dettagli sottili contro il cielo non tremolano.",
                 69, null, true);
 
+            BloomStab = Bind(Advanced, "Stable bloom", "Bloom stabile", true,
+                "Averages the game's bloom over time, so the glow around small reflections (glass, metal, domes) does not flicker with upscaling. Same look as the original.",
+                "Media nel tempo il bloom del gioco, cosi' l'alone attorno ai riflessi piccoli (vetri, metalli, cupole) non lampeggia con l'upscaling. Stesso aspetto dell'originale.",
+                69, null, true);
+
             // ---------------- 3. Diagnostics ----------------
             FsrDebugView = Bind(Diagnostics, "Debug view (FSR 3.1 only)", "Vista di debug (solo FSR 3.1)", false,
                 "Shows the FSR debug view (motion vectors, depth, reactivity).",
@@ -266,6 +272,7 @@ namespace OutwardFSR
             Language.SettingChanged += (_, __) => { ApplyLanguage(); _refreshMenu = true; };
 
             PostFxSplit.InstallPatch(new HarmonyLib.Harmony(Guid));
+            OutwardFSR.BloomStab.InstallPatch(new HarmonyLib.Harmony(Guid + ".bloom"));
 
             Log.LogInfo($"{Name} {Version} caricato. Upscaling {(ScalingEnabled.Value ? "attivo" : "disattivato")}, {ToggleKey.Value} per cambiare.");
         }
