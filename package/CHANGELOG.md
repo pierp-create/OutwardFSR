@@ -2,6 +2,12 @@
 
 *Italian version below — Versione italiana più sotto.*
 
+## 1.0.5 — 2026-11-24
+
+- **Fixed: smearing of moving objects and sun rays when used with other graphics mods, e.g. Outward UE5 Overhaul.** Some mods change the game camera after OutwardFSR has set it up: UE5 Overhaul removes the camera's motion vectors (with its default preset) and turns the game's SMAA or TAA back on. Without motion vectors FSR cannot tell where each pixel moved, so it smeared everything in motion, especially bright sun rays through leaves. OutwardFSR now checks the camera every frame and restores depth and motion vectors and turns the game's anti-aliasing off again while upscaling is on (FSR already does the anti-aliasing). When you turn upscaling off, the anti-aliasing chosen by the game or the other mod comes back. A message in the BepInEx log says when this happens.
+- *Stable bloom* is unchanged from 1.0.4.
+- Note for UE5 Overhaul users: it uses F11 for its A/B toggle. If you use the frame sequence key (off by default), set it to a different key.
+
 ## 1.0.4 — 2026-11-23
 
 - **Fixed: glint flicker on glass, metal and domes.** With upscaling, the game's bloom was computed on the jittered low-resolution image, so the glow around small reflections flashed from frame to frame. New advanced option *Stable bloom* (on by default) averages the bloom over time, reprojected with the motion vectors. Measured on uncompressed frame captures with a still camera: flicker on reflections is about 5 times lower and the same as the native game, with the same brightness. The order of the effects is unchanged, so edges against the sky stay clean.
@@ -61,6 +67,12 @@ First public release.
 ---
 
 # Registro delle modifiche (Italiano)
+
+## 1.0.5 — 24/11/2026
+
+- **Corretto: oggetti in movimento e raggi del sole impastati insieme ad altre mod grafiche, per esempio Outward UE5 Overhaul.** Alcune mod cambiano la telecamera del gioco dopo che OutwardFSR l'ha impostata: UE5 Overhaul toglie i vettori di movimento alla telecamera (con il suo preset predefinito) e riattiva lo SMAA o il TAA del gioco. Senza vettori di movimento FSR non sa dove si è spostato ogni pixel, quindi impastava tutto ciò che si muove, soprattutto i raggi del sole tra le foglie. Ora OutwardFSR controlla la telecamera a ogni fotogramma: ripristina profondità e vettori di movimento e rispegne l'antialiasing del gioco finché l'upscaling è attivo (l'antialiasing lo fa già FSR). Quando spegni l'upscaling torna l'antialiasing scelto dal gioco o dall'altra mod. Un messaggio nel log di BepInEx segnala quando succede.
+- *Bloom stabile* resta come nella 1.0.4.
+- Nota per chi usa UE5 Overhaul: usa F11 per il suo confronto A/B. Se usi il tasto della sequenza di fotogrammi (spento di default), assegnagli un tasto diverso.
 
 ## 1.0.4 — 23/11/2026
 

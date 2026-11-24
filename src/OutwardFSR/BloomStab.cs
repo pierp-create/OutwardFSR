@@ -27,7 +27,6 @@ namespace OutwardFSR
         private static readonly int IdSizes = Shader.PropertyToID("_Sizes");
 
         private const float HistoryWeight = 0.9f;
-
         private static ComputeShader _cs;
         private static RenderTexture _a, _b;
         private static int _lastFrame = -10;

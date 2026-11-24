@@ -11,7 +11,7 @@ namespace OutwardFSR
     {
         public const string Guid = "com.outwardfsr.mod";
         public const string Name = "Outward FSR";
-        public const string Version = "1.0.4";
+        public const string Version = "1.0.5";
 
         internal static ManualLogSource Log;
 

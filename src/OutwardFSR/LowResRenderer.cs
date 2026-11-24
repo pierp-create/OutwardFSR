@@ -299,6 +299,41 @@ namespace OutwardFSR
             StartCoroutine(EndOfFrameLoop());
         }
 
+        private bool _warnedDepthMode, _warnedAA;
+
+        /// <summary>
+        /// Altre mod grafiche (es. Outward UE5 Overhaul) possono cambiare le impostazioni della telecamera dopo di noi:
+        /// togliere i vettori di movimento (FSR impasta tutto cio' che si muove) o rimettere SMAA/TAA (doppio
+        /// antialiasing, e il TAA aggiunge un secondo jitter). Le ricontrolliamo a ogni fotogramma.
+        /// </summary>
+        private void EnforceCameraRequirements()
+        {
+            if (!Temporal) return;
+
+            const DepthTextureMode needed = DepthTextureMode.Depth | DepthTextureMode.MotionVectors;
+            if ((_cam.depthTextureMode & needed) != needed)
+            {
+                if (!_warnedDepthMode)
+                {
+                    _warnedDepthMode = true;
+                    Plugin.Log.LogWarning("Un'altra mod ha tolto profondita'/vettori di movimento alla telecamera: li ripristino (servono a FSR).");
+                }
+                _cam.depthTextureMode |= needed;
+            }
+
+            if (_ppl != null && _ppl.antialiasingMode != PostProcessLayer.Antialiasing.None)
+            {
+                if (!_warnedAA)
+                {
+                    _warnedAA = true;
+                    Plugin.Log.LogWarning($"Un'altra mod ha riattivato l'antialiasing del gioco ({_ppl.antialiasingMode}): lo disattivo, FSR fa gia' da antialiasing.");
+                }
+                // Alla disattivazione di FSR rimettiamo quello scelto dall'altra mod
+                _originalAA = _ppl.antialiasingMode;
+                _ppl.antialiasingMode = PostProcessLayer.Antialiasing.None;
+            }
+        }
+
         private Vector2Int ComputeRenderSize()
         {
             if (Temporal)
@@ -316,6 +351,8 @@ namespace OutwardFSR
         {
             if (_cam.targetTexture != null && _cam.targetTexture != _lowRes)
                 return; // il gioco usa già una sua RenderTexture: non tocchiamo nulla
+
+            EnforceCameraRequirements();
 
             if (_presenter != null)
             {

@@ -59,6 +59,7 @@ Advanced and diagnostic settings appear when *Advanced settings* is ticked in th
 ## Compatibility
 
 - Tested together with Outward UE5 Overhaul, SideLoader, Sinai's Utility Pack and More Map Details.
+- Works with graphics mods that change the game camera (e.g. Outward UE5 Overhaul): while upscaling is on, OutwardFSR keeps the motion vectors FSR needs and turns the game's own anti-aliasing off. UE5 Overhaul uses F11 for its A/B toggle, so if you use the frame sequence key, set it to a different key.
 - Mods that heavily change the camera or post-processing may conflict. If you see problems, make sure *Full-resolution post-processing* is off (the default) in the advanced settings.
 - Not compatible with forcing the game into DirectX 12 or Vulkan (`-force-d3d12`, `-force-vulkan`).
 
@@ -154,6 +155,7 @@ Le opzioni avanzate e di diagnostica compaiono spuntando *Advanced settings* nel
 ## Compatibilità
 
 - Provata insieme a Outward UE5 Overhaul, SideLoader, Sinai's Utility Pack e More Map Details.
+- Funziona con le mod grafiche che cambiano la telecamera del gioco (per esempio Outward UE5 Overhaul): finché l'upscaling è attivo, OutwardFSR mantiene i vettori di movimento che servono a FSR e spegne l'antialiasing del gioco. UE5 Overhaul usa F11 per il suo confronto A/B: se usi il tasto della sequenza di fotogrammi, assegnagli un tasto diverso.
 - Le mod che modificano pesantemente la telecamera o il post-processing potrebbero entrare in conflitto. In caso di problemi, controlla che *Post-processing a piena risoluzione* sia spento (predefinito) nelle opzioni avanzate.
 - Non è compatibile con il gioco forzato in DirectX 12 o Vulkan (`-force-d3d12`, `-force-vulkan`).
 
